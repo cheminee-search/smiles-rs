@@ -108,7 +108,7 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
         let refined = self.refined_atom_classes_from_invariants(&invariants);
         let rooted = self.rooted_symmetry_classes_from_refined(refined.classes());
         let roots = self.component_roots_from_planning(&invariants, &rooted);
-        self.spanning_forest_with_planning(&roots, &invariants, refined.classes(), &rooted)
+        self.spanning_forest_with_planning(&roots, &invariants, refined.classes(), &rooted, None)
     }
 
     #[must_use]
@@ -118,11 +118,13 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
         invariants: &[AtomInvariant],
         refined_classes: &[usize],
         rooted_classes: &[usize],
+        forced_root: Option<usize>,
     ) -> SpanningForest {
         let ordered_neighbors = self.ordered_neighbor_edges_table_with_planning(
             invariants,
             refined_classes,
             rooted_classes,
+            forced_root,
         );
         self.spanning_forest_with_ordered_neighbors(roots, &ordered_neighbors)
     }

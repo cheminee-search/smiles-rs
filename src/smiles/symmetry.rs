@@ -22,6 +22,42 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
         self.rooted_symmetry_classes_from_refined(refined.classes())
     }
 
+    /// Returns a per-atom rank that is consistent under graph renumbering,
+    /// for breaking ties the WL refinement in `rooted_classes` left open.
+    /// `None` when `rooted_classes` already distinguishes every atom, so the
+    /// exact (expensive) canonical labeling only runs for genuinely
+    /// symmetric neighborhoods. `forced_root`, when given, is individualized
+    /// in the exact search so the rank stays consistent under renumbering
+    /// for ties that involve the root (see
+    /// [`Smiles::exact_canonical_labeling_rooted`]).
+    #[must_use]
+    pub(crate) fn canonical_tie_break_rank(
+        &self,
+        rooted_classes: &[usize],
+        forced_root: Option<usize>,
+    ) -> Option<Vec<usize>> {
+        if classes_are_unique(rooted_classes) {
+            None
+        } else {
+            let labeling = match forced_root {
+                Some(root) => self.exact_canonical_labeling_rooted(root),
+                None => self.exact_canonical_labeling(),
+            };
+            Some(labeling.new_index_of_old_node().to_vec())
+        }
+    }
+
+    /// Cheap (WL-only) check for whether any atom shares its `rooted_class`
+    /// with another, used to skip the orbit-min relabeling loop when the WL
+    /// partition alone already guarantees a unique neighbor order.
+    #[must_use]
+    pub(crate) fn has_tied_rooted_classes(&self) -> bool {
+        let invariants = self.atom_invariants();
+        let refined = self.refined_atom_classes_from_invariants(&invariants);
+        let rooted = self.rooted_symmetry_classes_from_refined(refined.classes());
+        !classes_are_unique(&rooted)
+    }
+
     #[must_use]
     pub(crate) fn rooted_symmetry_classes_from_refined(
         &self,
@@ -335,5 +371,32 @@ mod tests {
             &parse("C1N2CN3CN1CN(C2)C3").rooted_symmetry_classes(),
             &[0, 6, 0, 6, 0, 6, 0, 6, 0, 0],
         );
+    }
+
+    #[test]
+    fn has_tied_rooted_classes_is_false_for_an_asymmetric_molecule() {
+        assert!(!parse("CCO").has_tied_rooted_classes());
+    }
+
+    #[test]
+    fn has_tied_rooted_classes_is_true_for_a_symmetric_molecule() {
+        assert!(parse("C1CC1").has_tied_rooted_classes());
+    }
+
+    #[test]
+    fn canonical_tie_break_rank_is_none_without_a_tie() {
+        let smiles = parse("CCO");
+        let rooted = smiles.rooted_symmetry_classes();
+        assert_eq!(smiles.canonical_tie_break_rank(&rooted, None), None);
+    }
+
+    #[test]
+    fn canonical_tie_break_rank_individualizes_the_forced_root() {
+        let smiles = parse("C1CC1");
+        let rooted = smiles.rooted_symmetry_classes();
+        let rank = smiles
+            .canonical_tie_break_rank(&rooted, Some(1))
+            .expect("cyclopropane atoms are WL-tied");
+        assert_eq!(rank[1], 0, "individualized root must rank first");
     }
 }

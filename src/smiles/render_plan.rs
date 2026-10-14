@@ -255,7 +255,30 @@ struct RenderOrdering {
 }
 
 impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
-    /// Builds the complete traversal-and-emission plan for this graph.
+    /// Test-only convenience for the unrooted plan.
+    #[cfg(test)]
+    #[must_use]
+    pub(crate) fn render_plan(&self) -> RenderPlan {
+        self.render_plan_with_root(None)
+    }
+
+    /// Replaces the chosen root of `forced`'s connected component with
+    /// `forced`, leaving the roots of other components untouched.
+    fn force_component_root(&self, roots: &mut [usize], forced: usize) {
+        let components = self.connected_components();
+        let target = components.component_of_node(forced);
+        for root in roots.iter_mut() {
+            if components.component_of_node(*root) == target {
+                *root = forced;
+                break;
+            }
+        }
+    }
+
+    /// Builds the complete traversal-and-emission plan for this graph,
+    /// optionally forcing the traversal of one connected component to start
+    /// at `forced_root`. Other components keep their deterministically
+    /// chosen roots.
     ///
     /// This is the planning half of display. It computes every ordering and
     /// normalization decision that affects the final string, then hands the
@@ -278,27 +301,6 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
     /// forest based on parser bond order is also evaluated and used only if it
     /// lowers the maximum label. This is a best-effort reduction step, not a
     /// proof that the final plan will always stay below `100`.
-    #[must_use]
-    pub(crate) fn render_plan(&self) -> RenderPlan {
-        self.render_plan_with_root(None)
-    }
-
-    /// Replaces the chosen root of `forced`'s connected component with
-    /// `forced`, leaving the roots of other components untouched.
-    fn force_component_root(&self, roots: &mut [usize], forced: usize) {
-        let components = self.connected_components();
-        let target = components.component_of_node(forced);
-        for root in roots.iter_mut() {
-            if components.component_of_node(*root) == target {
-                *root = forced;
-                break;
-            }
-        }
-    }
-
-    /// Builds a render plan, optionally forcing the traversal of one connected
-    /// component to start at `forced_root`. Other components keep their
-    /// deterministically chosen roots.
     pub(crate) fn render_plan_with_root(&self, forced_root: Option<usize>) -> RenderPlan {
         let node_count = self.nodes().len();
         let invariants = self.atom_invariants();
@@ -316,11 +318,13 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
                 &invariants,
                 &refined_classes,
                 &rooted_classes,
+                forced_root,
             ),
             &invariants,
             &refined_classes,
             &rooted_classes,
             node_count,
+            forced_root,
         );
         let ordering = if primary.max_assigned_label > 99 {
             let fallback = build_render_ordering(
@@ -330,6 +334,7 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
                 &refined_classes,
                 &rooted_classes,
                 node_count,
+                forced_root,
             );
             if fallback.max_assigned_label < primary.max_assigned_label {
                 fallback
@@ -412,9 +417,15 @@ fn build_render_ordering<AtomPolicy: SmilesAtomPolicy>(
     refined_classes: &[usize],
     rooted_classes: &[usize],
     node_count: usize,
+    forced_root: Option<usize>,
 ) -> RenderOrdering {
-    let branch_plan =
-        smiles.branch_plan_with_planning(&forest, invariants, refined_classes, rooted_classes);
+    let branch_plan = smiles.branch_plan_with_planning(
+        &forest,
+        invariants,
+        refined_classes,
+        rooted_classes,
+        forced_root,
+    );
     let (components, preorder_indices, global_preorder) =
         build_component_preorders(&forest, &branch_plan, node_count);
     let directional_overrides = smiles.projected_directional_bond_overrides_with_classes(
@@ -844,7 +855,6 @@ mod tests {
             &[StereoNeighbor::Atom(1), StereoNeighbor::Atom(3)]
         );
     }
-
     #[test]
     fn render_plan_assigns_ring_labels_from_final_preorder() {
         let smiles: Smiles = "C1CC1".parse().unwrap();
