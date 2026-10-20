@@ -3,7 +3,7 @@
 use alloc::vec::Vec;
 
 use geometric_traits::{
-    impls::PermutationGroup,
+    impls::{PermutationGroup, SmallestImage},
     traits::{CanonicalLabeling, CanonicalLabelingOptions, SparseMatrix2D, SparseValuedMatrixRef},
 };
 
@@ -27,13 +27,13 @@ struct NumberingRelativeStereo {
 }
 
 impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
-    /// Returns the smallest stereo image numbering fixing `root`.
-    pub(crate) fn symmetric_stereo_labeling(
+    fn stereo_skeleton(
         &self,
         root: Option<usize>,
         rooted_classes: &[usize],
         refined_classes: &[usize],
-    ) -> SmilesCanonicalLabeling {
+        parity_family: impl Fn(Option<Chirality>) -> u8,
+    ) -> (Vec<usize>, Vec<Vec<usize>>, NumberingRelativeStereo) {
         let records =
             self.double_bond_stereo_records_with_planning_classes(rooted_classes, refined_classes);
         let mut semantic_endpoint = alloc::vec![false; self.nodes().len()];
@@ -54,7 +54,7 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
             |node| {
                 let atom = self.nodes()[node];
                 let chirality = if stereo.parity_centers[node] {
-                    (true, tetrahedral_family(atom.chirality()), 0)
+                    (true, parity_family(atom.chirality()), 0)
                 } else {
                     let (kind, value) = canonical_chirality_key(atom.chirality());
                     (false, kind, value)
@@ -78,8 +78,20 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
                 ..Default::default()
             },
         );
-        let skeleton_labeling = SmilesCanonicalLabeling::new(result.order);
-        if result.automorphism_generators.is_empty()
+        (result.order, result.automorphism_generators, stereo)
+    }
+
+    /// Returns the smallest stereo image numbering fixing `root`.
+    pub(crate) fn symmetric_stereo_labeling(
+        &self,
+        root: Option<usize>,
+        rooted_classes: &[usize],
+        refined_classes: &[usize],
+    ) -> SmilesCanonicalLabeling {
+        let (order, generators, stereo) =
+            self.stereo_skeleton(root, rooted_classes, refined_classes, tetrahedral_family);
+        let skeleton_labeling = SmilesCanonicalLabeling::new(order);
+        if generators.is_empty()
             || (!stereo.parity_centers.contains(&true) && stereo.raw_directional_edges.is_empty())
         {
             return skeleton_labeling;
@@ -87,7 +99,7 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
 
         let canonical = self.exact_canonicalize_with_labeling(&skeleton_labeling);
         let new_index = skeleton_labeling.new_index_of_old_node();
-        let generators = result.automorphism_generators.iter().map(|generator| {
+        let generators = generators.iter().map(|generator| {
             let mut conjugated = alloc::vec![0; generator.len()];
             for (old, &image) in generator.iter().enumerate() {
                 conjugated[new_index[old]] = new_index[image];
@@ -153,6 +165,31 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
         parsed == emitted
     }
 
+    /// Tests whether inverting one fixed center changes the full stereo image.
+    pub(super) fn tetrahedral_stereo_changes_image(
+        &self,
+        node: usize,
+        rooted_classes: &[usize],
+        refined_classes: &[usize],
+    ) -> bool {
+        debug_assert!(self.renders_parity_relative(node));
+        let (_, generators, stereo) =
+            self.stereo_skeleton(Some(node), rooted_classes, refined_classes, |chirality| {
+                if matches!(chirality, Some(Chirality::AL(_))) { 3 } else { 1 }
+            });
+        if generators.is_empty() {
+            return true;
+        }
+        let group =
+            self.stereo_permutation_group(generators.into_iter(), &stereo.raw_directional_edges);
+        let mut points = self.stereo_points(&stereo.parity_centers, &stereo.raw_directional_edges);
+        let original = smallest_stereo_image(&group, &points);
+        let point_index = stereo.parity_centers[..node].iter().filter(|&&center| center).count();
+        points[point_index] ^= 1;
+        let inverted = smallest_stereo_image(&group, &points);
+        original.image != inverted.image
+    }
+
     /// Returns a skeleton automorphism minimizing the stereo points.
     fn stereo_smallest_image_automorphism(
         &self,
@@ -160,6 +197,17 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
         parity_centers: &[bool],
         raw_directional_edges: &[(usize, usize)],
     ) -> Vec<usize> {
+        let group = self.stereo_permutation_group(generators, raw_directional_edges);
+        let points = self.stereo_points(parity_centers, raw_directional_edges);
+        let smallest = smallest_stereo_image(&group, &points);
+        (0..self.nodes().len()).map(|node| smallest.element[2 * node] / 2).collect()
+    }
+
+    fn stereo_permutation_group(
+        &self,
+        generators: impl Iterator<Item = Vec<usize>>,
+        raw_directional_edges: &[(usize, usize)],
+    ) -> PermutationGroup {
         let node_count = self.nodes().len();
         let degree = 2 * node_count + 2 * raw_directional_edges.len();
         let induced = generators.map(|generator| {
@@ -179,9 +227,16 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
             }
             permutation
         });
-        let group = PermutationGroup::new(degree, induced)
-            .unwrap_or_else(|_| unreachable!("induced generators are permutations of the points"));
+        PermutationGroup::new(degree, induced)
+            .unwrap_or_else(|_| unreachable!("induced generators are permutations of the points"))
+    }
 
+    fn stereo_points(
+        &self,
+        parity_centers: &[bool],
+        raw_directional_edges: &[(usize, usize)],
+    ) -> Vec<usize> {
+        let node_count = self.nodes().len();
         let mut points: Vec<usize> = (0..node_count)
             .filter(|&node| parity_centers[node])
             .map(|node| 2 * node + usize::from(self.parity_bit(node)))
@@ -192,10 +247,7 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
                 .unwrap_or_else(|| unreachable!("raw directional edges exist"));
             2 * node_count + 2 * index + usize::from(entry.bond() == Bond::Down)
         }));
-        let smallest = group
-            .smallest_image(&points)
-            .unwrap_or_else(|_| unreachable!("stereo points are distinct and in range"));
-        (0..node_count).map(|node| smallest.element[2 * node] / 2).collect()
+        points
     }
 
     /// Combines tag parity with parsed neighbor inversion parity.
@@ -211,6 +263,12 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
             self.bond_matrix().sparse_row(node).map(|neighbor| automorphism[neighbor]).collect();
         odd_inversions(&images)
     }
+}
+
+fn smallest_stereo_image(group: &PermutationGroup, points: &[usize]) -> SmallestImage {
+    group
+        .smallest_image(points)
+        .unwrap_or_else(|_| unreachable!("stereo points are distinct and in range"))
 }
 
 /// `Some(false)` for `@`, `@TH1` and `@AL1`, `Some(true)` for their inverses,
