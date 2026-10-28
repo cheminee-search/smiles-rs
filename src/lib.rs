@@ -33,13 +33,13 @@ pub use crate::{
     smiles::{
         AromaticityAssignment, AromaticityAssignmentApplicationError, AromaticityDiagnostic,
         AromaticityModel, AromaticityPerception, AromaticityPolicy, AromaticityRingFamilyKind,
-        AromaticityStatus, AtomEnvironment, DoubleBondStereoConfig, Fragment, GraphSimilarities,
-        InitialProductVertexOrdering, KekulizationError, KekulizationMode, LargestFragmentMetric,
-        McesBuilder, McesResult, McesSearchMode, RdkitDefaultAromaticity, RdkitMdlAromaticity,
-        RdkitSimpleAromaticity, RingAtomMembership, RingAtomMembershipScratch, RingMembership,
-        Smiles, SmilesComponents, SmilesMces, SymmSssrResult, SymmSssrStatus, TetrahedralNeighbor,
-        WildcardAromaticityPerception, WildcardMolecularFormulaConversionError, WildcardSmiles,
-        WildcardSmilesComponents,
+        AromaticityStatus, AtomEnvironment, DoubleBondStereoConfig, Fragment, FragmentCandidate,
+        FragmentRankingError, GraphSimilarities, InitialProductVertexOrdering, KekulizationError,
+        KekulizationMode, LargestFragmentMetric, McesBuilder, McesResult, McesSearchMode,
+        RdkitDefaultAromaticity, RdkitMdlAromaticity, RdkitSimpleAromaticity, RingAtomMembership,
+        RingAtomMembershipScratch, RingMembership, Smiles, SmilesComponents, SmilesMces,
+        SymmSssrResult, SymmSssrStatus, TetrahedralNeighbor, WildcardAromaticityPerception,
+        WildcardMolecularFormulaConversionError, WildcardSmiles, WildcardSmilesComponents,
     },
 };
 
@@ -57,13 +57,13 @@ pub mod prelude {
     pub use crate::{
         AromaticityAssignment, AromaticityAssignmentApplicationError, AromaticityDiagnostic,
         AromaticityModel, AromaticityPerception, AromaticityPolicy, AromaticityRingFamilyKind,
-        AromaticityStatus, AtomEnvironment, DoubleBondStereoConfig, Fragment, GraphSimilarities,
-        InitialProductVertexOrdering, KekulizationError, KekulizationMode, LargestFragmentMetric,
-        McesBuilder, McesResult, McesSearchMode, RdkitDefaultAromaticity, RdkitMdlAromaticity,
-        RdkitSimpleAromaticity, RingAtomMembership, RingAtomMembershipScratch, RingMembership,
-        RootError, Smiles, SmilesComponents, SmilesError, SmilesErrorWithSpan, SmilesMces,
-        SubgraphError, SymmSssrResult, SymmSssrStatus, TetrahedralNeighbor,
-        WildcardAromaticityPerception, WildcardMolecularFormulaConversionError, WildcardSmiles,
-        WildcardSmilesComponents,
+        AromaticityStatus, AtomEnvironment, DoubleBondStereoConfig, Fragment, FragmentCandidate,
+        FragmentRankingError, GraphSimilarities, InitialProductVertexOrdering, KekulizationError,
+        KekulizationMode, LargestFragmentMetric, McesBuilder, McesResult, McesSearchMode,
+        RdkitDefaultAromaticity, RdkitMdlAromaticity, RdkitSimpleAromaticity, RingAtomMembership,
+        RingAtomMembershipScratch, RingMembership, RootError, Smiles, SmilesComponents,
+        SmilesError, SmilesErrorWithSpan, SmilesMces, SubgraphError, SymmSssrResult,
+        SymmSssrStatus, TetrahedralNeighbor, WildcardAromaticityPerception,
+        WildcardMolecularFormulaConversionError, WildcardSmiles, WildcardSmilesComponents,
     };
 }

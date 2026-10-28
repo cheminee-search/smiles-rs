@@ -43,6 +43,7 @@ mod connected_components;
 mod double_bond_stereo;
 mod emitter;
 mod fragment;
+mod fragment_ranking;
 mod from_str;
 mod geometric_traits_impl;
 mod implicit_hydrogens;
@@ -73,6 +74,7 @@ pub use self::{
     connected_components::{SmilesComponents, WildcardSmilesComponents},
     double_bond_stereo::DoubleBondStereoConfig,
     fragment::Fragment,
+    fragment_ranking::{FragmentCandidate, FragmentRankingError},
     geometric_traits_impl::{BondEntry, BondMatrix},
     kekulization::{KekulizationError, KekulizationMode},
     mces::{
