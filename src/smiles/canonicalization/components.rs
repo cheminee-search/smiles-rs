@@ -55,6 +55,17 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             new_index_of_old_node[old_node] = new_index;
         }
 
+        self.induced_component_with_mapping(old_nodes, &new_index_of_old_node)
+    }
+
+    /// Copies complete components using a caller-supplied parent-to-local map.
+    /// Whole components retain their connectivity, so their H cache and stereo
+    /// rows can be preserved. This core deliberately omits saved provenance.
+    pub(in crate::smiles) fn induced_component_with_mapping(
+        &self,
+        old_nodes: &[usize],
+        new_index_of_old_node: &[usize],
+    ) -> Self {
         let atom_nodes =
             old_nodes.iter().copied().map(|old_node| self.atom_nodes[old_node]).collect::<Vec<_>>();
         let mut builder = BondMatrixBuilder::default();
@@ -81,7 +92,7 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             .iter()
             .copied()
             .map(|old_node| {
-                remap_parsed_stereo_neighbors_row(self, old_node, &new_index_of_old_node)
+                remap_parsed_stereo_neighbors_row(self, old_node, new_index_of_old_node)
             })
             .collect::<Vec<_>>();
         let implicit_hydrogen_cache = old_nodes

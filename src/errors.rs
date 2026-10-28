@@ -281,6 +281,9 @@ impl fmt::Display for SmilesErrorWithSpan {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Error)]
 #[non_exhaustive]
 pub enum SubgraphError {
+    /// A component id is not a valid connected component of the parent graph.
+    #[error("Component id {0} is out of range for the parent graph")]
+    ComponentOutOfRange(usize),
     /// An atom id in the input is not a valid atom of the parent graph.
     #[error("Atom id {0} is out of range for the parent graph")]
     AtomOutOfRange(usize),
