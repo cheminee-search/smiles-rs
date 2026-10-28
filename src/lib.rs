@@ -16,6 +16,7 @@ pub mod bond;
 pub mod datasets;
 pub mod errors;
 pub(crate) mod parser;
+pub mod rdkit_2026_09_1;
 pub mod smiles;
 pub mod token;
 
