@@ -1,0 +1,78 @@
+{
+  "native_version": "2026.09.1",
+  "native_source": "fece8caa860bdf6c9c82bdb9253f22a0cf87150c",
+  "phase": "MolFromSmiles(sanitize=False,removeHs=False,parseName=False,allowCXSMILES=False), then UpdatePropertyCache(strict=False). No sanitize, H removal, normalization or native descriptor preparation.",
+  "declarations_sha256": "348fde4f69d490a99c828edadce2c19a7558305c18e7874b9eec3ecba5356b1c",
+  "generator_sha256": "6b1d24617b8f4c7eb5edca3bdd321e47e2bf7bc316dfa4dff092285802088c96",
+  "qualification": "Additional declared raw graph-H incidence cases, not sanitized descriptor parity.",
+  "rows": [
+    {
+      "id": "additional-graph-h-1",
+      "smiles": "N[H]O",
+      "counts": {
+        "graph_atoms": 3,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 3,
+        "heavy_atoms": 2,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 2,
+        "hydrogens_on_nitrogen_oxygen": 5,
+        "atoms_including_hydrogens": 6,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "additional-graph-h-2",
+      "smiles": "N[2H]O",
+      "counts": {
+        "graph_atoms": 3,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 3,
+        "heavy_atoms": 2,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 2,
+        "hydrogens_on_nitrogen_oxygen": 5,
+        "atoms_including_hydrogens": 6,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "additional-graph-h-3",
+      "smiles": "N[H-]",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 2,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "additional-graph-h-4",
+      "smiles": "N[H+]",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 2,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    }
+  ]
+}
