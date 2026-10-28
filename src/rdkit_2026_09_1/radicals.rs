@@ -56,13 +56,47 @@ pub enum RadicalPreparationError {
         /// Current/source atom index.
         atom: usize,
     },
-    /// The graph contains a cycle; lexical ring labels alone do not imply one.
+    /// The acyclic constructor encountered a topological cycle.
     #[error("cycle through edge {atom_a}-{atom_b} is outside radical preparation")]
     UnsupportedCycle {
         /// One edge endpoint.
         atom_a: usize,
         /// The other endpoint.
         atom_b: usize,
+    },
+    /// Every atom in an admitted cyclic component must be neutral carbon.
+    #[error("atom {atom} in a cyclic component must be neutral carbon")]
+    UnsupportedCyclicAtom {
+        /// Current/source atom index, including any attached tail.
+        atom: usize,
+    },
+    /// Every bond in an admitted cyclic component must be an ordinary single
+    /// bond.
+    #[error("bond {atom_a}-{atom_b} in a cyclic component must be a single bond")]
+    UnsupportedCyclicBond {
+        /// One current/source edge endpoint.
+        atom_a: usize,
+        /// The other current/source edge endpoint.
+        atom_b: usize,
+    },
+    /// Atom stereochemistry is outside saturated cyclic-component admission.
+    #[error("stereochemistry at atom {atom} in a cyclic component is unsupported")]
+    UnsupportedCyclicStereo {
+        /// Current/source atom index, including any attached tail.
+        atom: usize,
+    },
+    /// Checked H and radical state did not establish saturated cyclic carbon.
+    #[error(
+        "unsaturated atom {atom} in a cyclic component: total connectivity \
+         {total_connectivity}, radical electrons {radical_electrons}"
+    )]
+    UnsaturatedCyclicAtom {
+        /// Current/source atom index, including any attached tail.
+        atom: usize,
+        /// Graph degree plus captured explicit H plus checked implicit H.
+        total_connectivity: usize,
+        /// The count from the versioned radical policy.
+        radical_electrons: u8,
     },
     /// Graph hydrogen removal/projection is outside this capability.
     #[error("hydrogen vertex {atom} is outside radical preparation")]
@@ -201,11 +235,15 @@ impl AtomRadicalState {
 
 /// An immutable fresh-parse capability for a narrow versioned radical policy.
 ///
-/// The graph must be acyclic and nonaromatic, with no hydrogen vertices.
-/// Only B/C/N/O/P/S/F/Cl/Br/I may be bonded; other concrete elements may be
-/// isolated. The supported N-oxide cleanup runs before checked native valence,
-/// hydrogen and radical rules. Other cleanup families are conservatively
-/// rejected. Every initialized native valence cache must fit 0..=127.
+/// The graph must be nonaromatic, with no hydrogen vertices.
+/// [`Self::try_parse`] admits only acyclic graphs.
+/// [`Self::try_parse_with_saturated_carbocycles`] additionally admits
+/// saturated, neutral carbon cyclic components without explicit stereo; its
+/// restrictions cover their attached tails as well. Only B/C/N/O/P/S/F/Cl/Br/I
+/// may be bonded; other concrete elements may be isolated. The supported
+/// N-oxide cleanup runs before checked native valence, hydrogen and radical
+/// rules. Other cleanup families are conservatively rejected. Every initialized
+/// native valence cache must fit 0..=127.
 ///
 /// This certifies indexed element/isotope/charge/bond/H/radical metadata in
 /// that domain, not full sanitization, stereochemistry, CIP or normalization.
@@ -218,7 +256,7 @@ pub struct RadicalPreparedSmiles {
 }
 
 impl RadicalPreparedSmiles {
-    /// Parses, prepares and admits an owned graph under the versioned policy.
+    /// Parses, prepares and admits an acyclic graph under the versioned policy.
     ///
     /// Origin NoImplicit flags are captured before cleanup can change syntax.
     /// No legacy radical helper, aromatic localization or native library is
@@ -228,6 +266,36 @@ impl RadicalPreparedSmiles {
     /// Returns a typed error for parser exclusions, unsupported domains,
     /// cleanup refusals, valence/range failures or indexed H/state mismatches.
     pub fn try_parse(text: &str) -> Result<Self, RadicalPreparationError> {
+        Self::parse_with_cycles(text, CycleAdmission::Reject)
+    }
+
+    /// Also admits connected components containing saturated carbon cycles.
+    ///
+    /// Every atom in each cyclic component, including attached tails, must be
+    /// neutral carbon without atom stereo. Every edge must be a nonaromatic
+    /// [`Bond::Single`]. Checked radical counts must be zero, and graph degree
+    /// plus captured nonvertex explicit H plus checked implicit H must equal
+    /// four at every carbon. Isotope and atom-map labels remain supported.
+    ///
+    /// Other disconnected acyclic components retain [`Self::try_parse`]'s
+    /// policy, including its treatment of stereo, radicals and N-oxide cleanup.
+    /// Fused, spiro, bridged and cage topology is not itself excluded. This
+    /// constructor does not compute a cycle basis or certify later ring
+    /// perception, aromaticity, stereochemistry or full sanitization.
+    ///
+    /// # Errors
+    /// Returns the existing preparation errors or an indexed cyclic-component
+    /// error when its structural, hydrogen or radical restrictions fail.
+    pub fn try_parse_with_saturated_carbocycles(
+        text: &str,
+    ) -> Result<Self, RadicalPreparationError> {
+        Self::parse_with_cycles(text, CycleAdmission::SaturatedCarbocycles)
+    }
+
+    fn parse_with_cycles(
+        text: &str,
+        cycles: CycleAdmission,
+    ) -> Result<Self, RadicalPreparationError> {
         let parsed: Smiles = text.parse()?;
         let origins: Vec<_> = parsed
             .nodes()
@@ -239,7 +307,7 @@ impl RadicalPreparedSmiles {
                 }
             })
             .collect();
-        check_domain(&parsed)?;
+        let cyclic_atoms = check_domain(&parsed, cycles)?;
         reject_other_cleanup(&parsed)?;
         let molecule = parsed.try_with_nitrogen_oxide_cleanup()?;
         check_cleanup(&parsed, &molecule)?;
@@ -268,6 +336,20 @@ impl RadicalPreparedSmiles {
             } else {
                 0
             };
+            if cyclic_atoms[id] {
+                let total_connectivity = molecule
+                    .edge_count_for_node(id)
+                    .checked_add(usize::from(origin.explicit_hydrogens))
+                    .and_then(|value| value.checked_add(usize::from(implicit_hydrogens)))
+                    .ok_or(RadicalPreparationError::ArithmeticOverflow { atom: id })?;
+                if total_connectivity != 4 || radical_electrons != 0 {
+                    return Err(RadicalPreparationError::UnsaturatedCyclicAtom {
+                        atom: id,
+                        total_connectivity,
+                        radical_electrons,
+                    });
+                }
+            }
             atoms.push(AtomRadicalState {
                 source_no_implicit: origin.no_implicit,
                 explicit_hydrogens: origin.explicit_hydrogens,
@@ -312,6 +394,12 @@ impl RadicalPreparedSmiles {
 struct Origin {
     no_implicit: bool,
     explicit_hydrogens: u8,
+}
+
+#[derive(Clone, Copy)]
+enum CycleAdmission {
+    Reject,
+    SaturatedCarbocycles,
 }
 
 fn number(atom: &Atom) -> u8 {
@@ -363,8 +451,12 @@ fn root(parent: &[usize], mut node: usize) -> usize {
     node
 }
 
-fn check_domain(molecule: &Smiles) -> Result<(), RadicalPreparationError> {
+fn check_domain(
+    molecule: &Smiles,
+    cycles: CycleAdmission,
+) -> Result<Vec<bool>, RadicalPreparationError> {
     let mut parent: Vec<_> = (0..molecule.nodes().len()).collect();
+    let mut cyclic = alloc::vec![false; parent.len()];
     for (id, atom) in molecule.nodes().iter().enumerate() {
         if atom.aromatic() {
             return Err(RadicalPreparationError::UnsupportedAromaticState { atom: id });
@@ -388,18 +480,47 @@ fn check_domain(molecule: &Smiles) -> Result<(), RadicalPreparationError> {
                 let a = root(&parent, id);
                 let b = root(&parent, other);
                 if a == b {
-                    return Err(RadicalPreparationError::UnsupportedCycle {
-                        atom_a: id,
-                        atom_b: other,
-                    });
+                    if matches!(cycles, CycleAdmission::Reject) {
+                        return Err(RadicalPreparationError::UnsupportedCycle {
+                            atom_a: id,
+                            atom_b: other,
+                        });
+                    }
+                    cyclic[a] = true;
+                } else {
+                    parent[b] = a;
+                    cyclic[a] |= cyclic[b];
                 }
-                parent[b] = a;
             }
         }
         // Cleanup can initialize native caches before strict validation.
         cache_value(id, NativeValenceCache::Explicit, explicit_sum(molecule, id)?)?;
     }
-    Ok(())
+    // Resolve membership after all unions: a later bridge can merge a cyclic
+    // component into another root, and all attached atoms share its contract.
+    for id in 0..parent.len() {
+        cyclic[id] = cyclic[root(&parent, id)];
+    }
+    for (id, atom) in molecule.nodes().iter().enumerate() {
+        if !cyclic[id] {
+            continue;
+        }
+        if number(atom) != 6 || atom.charge_value() != 0 {
+            return Err(RadicalPreparationError::UnsupportedCyclicAtom { atom: id });
+        }
+        if atom.chirality().is_some() {
+            return Err(RadicalPreparationError::UnsupportedCyclicStereo { atom: id });
+        }
+        for edge in molecule.edges_for_node(id) {
+            if edge.bond() != Bond::Single {
+                return Err(RadicalPreparationError::UnsupportedCyclicBond {
+                    atom_a: id,
+                    atom_b: edge.target(),
+                });
+            }
+        }
+    }
+    Ok(cyclic)
 }
 
 fn reject_other_cleanup(molecule: &Smiles) -> Result<(), RadicalPreparationError> {

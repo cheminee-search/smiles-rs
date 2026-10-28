@@ -37,6 +37,20 @@ bracket, inferred, and graph hydrogens. Its checked integer counts and carbon
 total-connectivity fraction describe the supplied graph state; they do not
 sanitize molecules or implement a prepared native descriptor contract.
 
+`rdkit_2026_09_1::RadicalPreparedSmiles::try_parse` admits a bounded acyclic
+domain with checked native-policy valence, hydrogen and radical metadata. Its
+additive `try_parse_with_saturated_carbocycles` constructor also admits cyclic
+connected components made entirely of saturated neutral carbon and ordinary
+single bonds, including their attached tails. Cyclic components exclude explicit
+stereo and radicals; disconnected acyclic components keep the original policy.
+Both constructors preserve indexed graphs and return typed errors outside their
+declared domains. They do not provide full sanitization or guarantee subsequent
+ring perception.
+
+This staged API adds a constructor and cyclic-component error variants to the
+existing non-exhaustive `RadicalPreparationError` enum; `try_parse` keeps its
+acyclic admission and errors.
+
 | Feature | Effect |
 | ------- | ------ |
 | `datasets` | Streams PubChem, ZINC20, COCONUT, LOTUS and MassSpecGym from a local cache, requires `std`. See [`datasets`](https://docs.rs/smiles-rs/latest/smiles_rs/datasets/). |
