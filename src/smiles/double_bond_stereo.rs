@@ -140,6 +140,34 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
         self.double_bond_stereo_records_from_classes(candidates, &rooted_classes, &refined_classes)
     }
 
+    /// Endpoints whose eligible alkene geometry is currently unspecified.
+    /// Directional emission must not accidentally specify these by marking
+    /// shared substituent bonds for neighboring, specified alkenes.
+    pub(super) fn unspecified_double_bond_endpoints(
+        &self,
+        records: &[DoubleBondStereoRecord],
+    ) -> Vec<bool> {
+        let mut specified = vec![false; self.nodes().len()];
+        for record in records {
+            specified[record.side_a().endpoint()] = true;
+            specified[record.side_b().endpoint()] = true;
+        }
+        let mut unspecified = vec![false; self.nodes().len()];
+        let mut small_ring_bonds = SmallRingBonds::new(self);
+        for ((a, b), entry) in self.bond_matrix().sparse_entries() {
+            if a < b
+                && non_aromatic_double_bond(*entry)
+                && !specified[a]
+                && self.double_bond_supports_semantic_stereo(a, b)
+                && !small_ring_bonds.contains(a, b)
+            {
+                unspecified[a] = true;
+                unspecified[b] = true;
+            }
+        }
+        unspecified
+    }
+
     #[must_use]
     pub(super) fn double_bond_stereo_record(
         &self,

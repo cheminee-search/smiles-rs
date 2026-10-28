@@ -93,6 +93,7 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             return DirectionalBondOverrides::default();
         }
         let node_count = self.nodes().len();
+        let unspecified = self.unspecified_double_bond_endpoints(&records);
         let mut semantic_endpoints = vec![false; node_count];
         for record in &records {
             semantic_endpoints[record.side_a().endpoint()] = true;
@@ -101,21 +102,31 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
         let constraints = records
             .into_iter()
             .map(|record| {
+                let reference_a = self.directional_reference_avoiding_unspecified(
+                    record.side_a().endpoint(),
+                    record.side_b().endpoint(),
+                    record.side_a().reference_atom(),
+                    &unspecified,
+                );
+                let reference_b = self.directional_reference_avoiding_unspecified(
+                    record.side_b().endpoint(),
+                    record.side_a().endpoint(),
+                    record.side_b().reference_atom(),
+                    &unspecified,
+                );
                 DirectionalParityConstraint {
-                    left_edge_key: crate::smiles::edge_key(
-                        record.side_a().endpoint(),
-                        record.side_a().reference_atom(),
-                    ),
+                    left_edge_key: crate::smiles::edge_key(record.side_a().endpoint(), reference_a),
                     right_edge_key: crate::smiles::edge_key(
                         record.side_b().endpoint(),
-                        record.side_b().reference_atom(),
+                        reference_b,
                     ),
                     same_parity: matches!(
                         record.config(),
                         crate::smiles::double_bond_stereo::DoubleBondStereoConfig::Z
-                    ) ^ (record.side_a().endpoint()
-                        > record.side_a().reference_atom())
-                        ^ (record.side_b().endpoint() > record.side_b().reference_atom()),
+                    ) ^ (reference_a != record.side_a().reference_atom())
+                        ^ (reference_b != record.side_b().reference_atom())
+                        ^ (record.side_a().endpoint() > reference_a)
+                        ^ (record.side_b().endpoint() > reference_b),
                 }
             })
             .collect::<Vec<_>>();
@@ -129,6 +140,33 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             semantic_endpoints,
         }
     }
+
+    /// Prefer an alternative explicit substituent when marking the ordinary
+    /// reference bond could give an unspecified neighboring alkene a direction.
+    /// This depends on geometry and topology, not the input slash placement.
+    fn directional_reference_avoiding_unspecified(
+        &self,
+        endpoint: usize,
+        opposite_endpoint: usize,
+        reference: usize,
+        unspecified: &[bool],
+    ) -> usize {
+        if !unspecified[reference] {
+            return reference;
+        }
+        let mut alternatives = self
+            .edges_for_node(endpoint)
+            .filter_map(|edge| edge.other(endpoint))
+            .filter(|&neighbor| neighbor != opposite_endpoint && !unspecified[neighbor]);
+        let Some(alternative) = alternatives.next() else {
+            return reference;
+        };
+        // Valid trigonal endpoints have only one other substituent. Do not
+        // impose an arbitrary neighbor-order choice on unsupported valence.
+        if alternatives.next().is_none() { alternative } else { reference }
+    }
+
+
 }
 
 pub(super) fn directional_override_rows_from_parity_constraints(
