@@ -153,19 +153,11 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             let rank = labeling.new_index_of_old_node();
             candidate_atom_ids.sort_unstable_by_key(|&atom_id| rank[atom_id]);
         }
-        if has_unlocalizable_aromatic_component(
-            self.nodes().len(),
-            &aromatic_bonds,
-            &candidate_atom_ids,
-        ) {
-            return Err(KekulizationError::NoPerfectMatching { candidate_atom_count: 0 });
-        }
+        let zero_demand_atoms =
+            zero_demand_aromatic_atoms(self.nodes().len(), &aromatic_bonds, &candidate_atom_ids);
 
         let candidate_graph =
             KekulizationCandidateGraph::new(self, &aromatic_bonds, &candidate_atom_ids);
-        if candidate_graph.graph.number_of_rows() == 0 {
-            return Err(KekulizationError::NoPerfectMatching { candidate_atom_count: 0 });
-        }
         let matched_edges = candidate_graph.matched_original_edges()?;
 
         let atom_nodes = self
@@ -203,6 +195,11 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             self.parsed_stereo_neighbors.clone(),
             Some(self.radical_electron_counts().to_vec()),
         );
+        if !zero_demand_atoms.is_empty()
+            && !zero_demand_components_are_preserved(self, &kekulized, &zero_demand_atoms)
+        {
+            return Err(KekulizationError::NoPerfectMatching { candidate_atom_count: 0 });
+        }
         Ok(kekulized)
     }
 
@@ -214,6 +211,9 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
     /// Aromatic graphs that do not retain enough local chemistry to be
     /// localized from their current state alone, such as some dummy-atom
     /// aromatic systems, return an error instead of guessing a bond pattern.
+    /// Components needing no new double bonds are accepted only when their
+    /// hydrogens and aromatic flags survive complete default-model perception
+    /// of the localized graph.
     ///
     /// The chosen Kekule structure depends only on the molecule, not on the
     /// order of its atoms.
@@ -356,11 +356,11 @@ fn clear_aromatic_flags<AtomPolicy: SmilesAtomPolicy>(
     )
 }
 
-fn has_unlocalizable_aromatic_component(
+fn zero_demand_aromatic_atoms(
     atom_count: usize,
     aromatic_bonds: &[AromaticBond],
     candidate_atom_ids: &[usize],
-) -> bool {
+) -> Vec<usize> {
     let mut adjacency = vec![Vec::new(); atom_count];
     for bond in aromatic_bonds {
         adjacency[bond.node_a].push(bond.node_b);
@@ -374,6 +374,7 @@ fn has_unlocalizable_aromatic_component(
 
     let mut visited = vec![false; atom_count];
     let mut stack = Vec::new();
+    let mut zero_demand_atoms = Vec::new();
 
     for start in 0..atom_count {
         if visited[start] || adjacency[start].is_empty() {
@@ -382,10 +383,18 @@ fn has_unlocalizable_aromatic_component(
 
         visited[start] = true;
         stack.push(start);
-        let mut component_candidate_count = 0usize;
+        let mut component_has_candidate = false;
+        let component_start = zero_demand_atoms.len();
 
         while let Some(node) = stack.pop() {
-            component_candidate_count += usize::from(candidate_flags[node]);
+            if !component_has_candidate {
+                if candidate_flags[node] {
+                    component_has_candidate = true;
+                    zero_demand_atoms.truncate(component_start);
+                } else {
+                    zero_demand_atoms.push(node);
+                }
+            }
             for &neighbor in &adjacency[node] {
                 if !visited[neighbor] {
                     visited[neighbor] = true;
@@ -393,13 +402,42 @@ fn has_unlocalizable_aromatic_component(
                 }
             }
         }
-
-        if component_candidate_count == 0 {
-            return true;
-        }
     }
 
-    false
+    zero_demand_atoms
+}
+
+/// An empty matching can be correct: every aromatic atom may already have its
+/// required valence, for example through lone pairs or exocyclic double bonds.
+/// But a non-candidate may also have unknown chemistry. Admit the empty
+/// matching only when the localized graph preserves the affected atoms'
+/// hydrogens and reproduces their original aromatic atom and bond flags under
+/// the default model. Ordinary components retain their existing matching
+/// behavior.
+fn zero_demand_components_are_preserved(
+    source: &Smiles<impl SmilesAtomPolicy>,
+    localized: &Smiles<impl SmilesAtomPolicy>,
+    atom_ids: &[usize],
+) -> bool {
+    if atom_ids.iter().any(|&atom_id| {
+        source.nodes()[atom_id].element().is_none()
+            || source.implicit_hydrogen_count(atom_id) != localized.implicit_hydrogen_count(atom_id)
+    }) {
+        return false;
+    }
+
+    // This graph has no aromatic flags and already carries its radical sidecar,
+    // so perception does not need to localize it to derive radical counts.
+    let assignment = localized.aromaticity_assignment();
+    if assignment.status() != super::AromaticityStatus::Complete {
+        return false;
+    }
+    atom_ids.iter().all(|&atom_id| {
+        source.nodes()[atom_id].aromatic() == assignment.contains_atom(atom_id)
+            && source.edges_for_node(atom_id).all(|edge| {
+                edge.is_aromatic() == assignment.contains_edge(edge.source(), edge.target())
+            })
+    })
 }
 
 fn candidate_atom_ids(smiles: &Smiles<impl SmilesAtomPolicy>) -> Vec<usize> {
@@ -758,6 +796,17 @@ mod tests {
     }
 
     #[test]
+    fn zero_demand_wildcard_components_remain_unsupported() {
+        for source in ["*1:*:*:1", "O=c1[nH]c(=O)ss1.*1:*:*:1"] {
+            let smiles = parse_wildcard_smiles(source).expect("wildcard graph should parse");
+            assert_eq!(
+                smiles.kekulize_standalone(),
+                Err(KekulizationError::NoPerfectMatching { candidate_atom_count: 0 })
+            );
+        }
+    }
+
+    #[test]
     fn odd_cycle_candidate_graph_has_no_perfect_matching() {
         let smiles = smiles_from_edges(
             vec![aromatic_carbon(), aromatic_carbon(), aromatic_carbon()],
@@ -965,7 +1014,7 @@ mod tests {
     }
 
     #[test]
-    fn rendered_aromatic_phosphorus_cage_requires_preserved_source_under_default_perception() {
+    fn rendered_aromatic_phosphorus_cage_localizes_without_preserved_source() {
         let smiles = Smiles::from_str("CP1P2P(P3P1P3P2C)C").expect("valid smiles");
         let perceived = smiles
             .perceive_aromaticity_for(crate::smiles::AromaticityPolicy::RdkitDefault)
@@ -974,10 +1023,24 @@ mod tests {
         let reparsed =
             Smiles::from_str(&aromatic_smiles).expect("rendered aromatic smiles should parse");
 
-        assert_eq!(
-            reparsed.kekulize_standalone(),
-            Err(KekulizationError::NoPerfectMatching { candidate_atom_count: 0 })
-        );
+        let localized = reparsed.kekulize_standalone().expect("the empty matching is valid");
+        assert_eq!(count_bonds(&localized, Bond::Double), 0);
+        assert_eq!(localized.implicit_hydrogen_counts(), reparsed.implicit_hydrogen_counts());
+        assert_eq!(localized.radical_electron_counts(), reparsed.radical_electron_counts());
+        for (&original, &actual) in reparsed.nodes().iter().zip(localized.nodes()) {
+            assert_eq!(actual, original.with_aromatic(false));
+        }
+        let reperceived = localized.perceive_aromaticity().expect("perception should succeed");
+        assert_eq!(reperceived.status(), crate::smiles::AromaticityStatus::Complete);
+        for (atom_id, atom) in reparsed.nodes().iter().enumerate() {
+            assert_eq!(reperceived.assignment().contains_atom(atom_id), atom.aromatic());
+            for edge in reparsed.edges_for_node(atom_id) {
+                assert_eq!(
+                    reperceived.assignment().contains_edge(edge.source(), edge.target()),
+                    edge.is_aromatic()
+                );
+            }
+        }
     }
 
     #[test]
