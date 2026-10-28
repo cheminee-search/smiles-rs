@@ -53,6 +53,7 @@ mod kekulization;
 mod mces;
 mod molecular_formula;
 mod neighbors;
+mod nitrogen_oxide_cleanup;
 mod rdkit_symm_sssr;
 mod refinement;
 mod render_plan;
@@ -84,6 +85,7 @@ pub use self::{
         McesResult, McesSearchMode, SmilesMces,
     },
     molecular_formula::WildcardMolecularFormulaConversionError,
+    nitrogen_oxide_cleanup::NitrogenOxideCleanupError,
     tetrahedral_stereo::TetrahedralNeighbor,
 };
 pub(crate) use self::{
