@@ -94,6 +94,9 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
     /// fragment retains parent/local atom mappings and projects any saved
     /// localization source onto the same parent atom IDs. No sanitization,
     /// canonicalization or hydrogen re-inference is performed.
+    /// Source ring labels and relative bond ordering, including equal-order
+    /// ties, are retained. This does not promise the original rendered
+    /// spelling.
     ///
     /// # Errors
     /// Returns [`SubgraphError::ComponentOutOfRange`] if `component_id` is not
@@ -122,7 +125,7 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
             local_of_parent[parent] = local;
         }
 
-        let mut smiles = self.induced_component_with_mapping(&parent_of_local, &local_of_parent);
+        let mut smiles = self.preserved_component_with_mapping(&parent_of_local, &local_of_parent);
         let mut output = &mut smiles;
         let mut source = self.kekulization_source.as_deref();
         while let Some(saved) = source {
@@ -138,7 +141,7 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
                     .eq(self.bond_matrix().sparse_entries().map(|(edge, _)| edge))
             );
             output.kekulization_source = Some(Box::new(
-                saved.induced_component_with_mapping(&parent_of_local, &local_of_parent),
+                saved.preserved_component_with_mapping(&parent_of_local, &local_of_parent),
             ));
             output = output
                 .kekulization_source
@@ -276,8 +279,14 @@ fn register_local(
 mod tests {
     use alloc::{boxed::Box, vec::Vec};
 
+    use geometric_traits::traits::SparseValuedMatrixRef;
+
     use super::{Fragment, Smiles};
-    use crate::{SubgraphError, smiles::StereoNeighbor};
+    use crate::{
+        SubgraphError,
+        bond::ring_num::RingNum,
+        smiles::{BondEntry, BondMatrix, StereoNeighbor},
+    };
 
     fn assert_mapped_state(parent: &Smiles, selected: &Smiles, fragment: &Fragment) {
         assert_eq!(selected.nodes().len(), fragment.atom_count());
@@ -311,12 +320,35 @@ mod tests {
             );
             for edge in parent.edges_for_node(original) {
                 let neighbor = fragment.local_id(edge.other(original).unwrap()).unwrap();
-                assert_eq!(
-                    selected.edge_for_node_pair((local, neighbor)).unwrap().descriptor(),
-                    edge.descriptor()
-                );
+                let copied = selected.edge_for_node_pair((local, neighbor)).unwrap();
+                assert_eq!(copied.descriptor(), edge.descriptor());
+                assert_eq!(copied.ring_num(), edge.ring_num());
             }
         }
+        let mut expected_order = parent
+            .bond_matrix()
+            .sparse_entries()
+            .filter_map(|((a, b), entry)| {
+                if a >= b {
+                    return None;
+                }
+                Some((entry.order(), fragment.local_id(a)?, fragment.local_id(b)?))
+            })
+            .collect::<Vec<_>>();
+        expected_order.sort_unstable();
+        let mut order_keys = expected_order.iter().map(|&(order, _, _)| order).collect::<Vec<_>>();
+        order_keys.dedup();
+        let expected_order = expected_order
+            .into_iter()
+            .map(|(order, a, b)| (order_keys.binary_search(&order).unwrap(), a, b))
+            .collect::<Vec<_>>();
+        let mut actual_order = selected
+            .bond_matrix()
+            .sparse_entries()
+            .filter_map(|((a, b), entry)| (a < b).then_some((entry.order(), a, b)))
+            .collect::<Vec<_>>();
+        actual_order.sort_unstable();
+        assert_eq!(actual_order, expected_order);
     }
 
     fn assert_component(parent: &Smiles, id: usize) {
@@ -350,6 +382,72 @@ mod tests {
         let components = smiles.connected_components();
         let component = components.component_of_node(1);
         assert_component(&smiles, component);
+    }
+
+    #[test]
+    fn whole_components_keep_lexical_closure_labels_and_bond_order() {
+        for input in [
+            "c1ccsc1.CCO",
+            "[nH]1cccc1.c1ccncc1",
+            "C1.O.CC1",
+            "C1CC1.C1CCC1",
+            "C12CCC(CC1)CC2.O",
+            "C(CC)CC.O",
+        ] {
+            let parent: Smiles = input.parse().unwrap();
+            for component in 0..parent.connected_components().number_of_components() {
+                assert_component(&parent, component);
+            }
+        }
+    }
+
+    #[test]
+    fn whole_component_keeps_bond_order_without_ring_labels() {
+        let parent: Smiles = "C(CC)CC.O".parse().unwrap();
+        assert_component(&parent, 0);
+    }
+
+    #[test]
+    fn whole_component_keeps_equal_bond_order_keys_ambiguous() {
+        let mut parent: Smiles = "C(CC)CC.O".parse().unwrap();
+        parent.bond_matrix = BondMatrix::from_sorted_upper_triangular_entries(
+            parent.nodes().len(),
+            parent
+                .bond_matrix()
+                .sparse_entries()
+                .filter_map(|((a, b), entry)| (a < b).then_some((a, b, entry.with_order(17)))),
+        )
+        .unwrap();
+        assert_component(&parent, 0);
+    }
+
+    #[test]
+    fn whole_component_keeps_each_sources_own_bond_provenance() {
+        let mut parent: Smiles = "C1CC1.O".parse().unwrap();
+        let mut source = parent.clone();
+        // A valid matrix need not have the parser builder's ring-last ordering.
+        // Preserve relative ranks directly, including at every saved level.
+        let edge_count = source.number_of_bonds();
+        source.bond_matrix = BondMatrix::from_sorted_upper_triangular_entries(
+            source.nodes().len(),
+            source.bond_matrix().sparse_entries().filter_map(|((a, b), entry)| {
+                (a < b).then_some((
+                    a,
+                    b,
+                    BondEntry::from_descriptor(
+                        entry.descriptor(),
+                        entry.ring_num().map(|_| RingNum::try_new(7).unwrap()),
+                        edge_count - 1 - entry.order(),
+                    ),
+                ))
+            }),
+        )
+        .unwrap();
+        source.kekulization_source = Some(Box::new(parent.clone()));
+        parent.kekulization_source = Some(Box::new(source));
+        for component in 0..parent.connected_components().number_of_components() {
+            assert_component(&parent, component);
+        }
     }
 
     #[test]

@@ -5,7 +5,7 @@ use geometric_traits::traits::SparseValuedMatrixRef;
 use super::{
     SmilesCanonicalLabeling, canonicalization_state_key, remap_parsed_stereo_neighbors_row,
 };
-use crate::smiles::{BondMatrixBuilder, Smiles};
+use crate::smiles::{BondMatrix, BondMatrixBuilder, Smiles};
 
 impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
     pub(super) fn canonical_labeling_with(
@@ -66,8 +66,6 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
         old_nodes: &[usize],
         new_index_of_old_node: &[usize],
     ) -> Self {
-        let atom_nodes =
-            old_nodes.iter().copied().map(|old_node| self.atom_nodes[old_node]).collect::<Vec<_>>();
         let mut builder = BondMatrixBuilder::default();
         for ((row, column), entry) in self.bond_matrix().sparse_entries() {
             if row >= column
@@ -88,6 +86,61 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
                 });
         }
 
+        self.component_with_bond_matrix(
+            old_nodes,
+            new_index_of_old_node,
+            builder.finish(old_nodes.len()),
+        )
+    }
+
+    /// Copies a complete component while retaining lexical bond provenance.
+    /// The caller supplies ascending parent IDs, preserving bond orientation.
+    /// Saved source graphs are projected separately by the fragment API.
+    pub(in crate::smiles) fn preserved_component_with_mapping(
+        &self,
+        old_nodes: &[usize],
+        new_index_of_old_node: &[usize],
+    ) -> Self {
+        debug_assert!(old_nodes.windows(2).all(|nodes| nodes[0] < nodes[1]));
+        let mut edges = self
+            .bond_matrix()
+            .sparse_entries()
+            .filter_map(|((row, column), entry)| {
+                let new_row = new_index_of_old_node[row];
+                let new_column = new_index_of_old_node[column];
+                (row < column && new_row != usize::MAX && new_column != usize::MAX)
+                    .then_some((new_row, new_column, *entry))
+            })
+            .collect::<Vec<_>>();
+        edges.sort_unstable_by_key(|&(row, column, entry)| (entry.order(), row, column));
+        let mut previous_order = None;
+        let mut rank = 0;
+        for (_, _, entry) in &mut edges {
+            let original_order = entry.order();
+            if previous_order.is_some_and(|previous| previous != original_order) {
+                rank += 1;
+            }
+            previous_order = Some(original_order);
+            // Preserve equal keys too: callers may use ties to signal that
+            // source bond ordering is ambiguous.
+            *entry = entry.with_order(rank);
+        }
+        edges.sort_unstable_by_key(|&(row, column, _)| (row, column));
+        let bond_matrix = BondMatrix::from_sorted_upper_triangular_entries(old_nodes.len(), edges)
+            .unwrap_or_else(|_| {
+                unreachable!("complete component projection preserves a simple graph")
+            });
+        self.component_with_bond_matrix(old_nodes, new_index_of_old_node, bond_matrix)
+    }
+
+    fn component_with_bond_matrix(
+        &self,
+        old_nodes: &[usize],
+        new_index_of_old_node: &[usize],
+        bond_matrix: BondMatrix,
+    ) -> Self {
+        let atom_nodes =
+            old_nodes.iter().copied().map(|old_node| self.atom_nodes[old_node]).collect::<Vec<_>>();
         let parsed_stereo_neighbors = old_nodes
             .iter()
             .copied()
@@ -106,7 +159,7 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
 
         Self::from_bond_matrix_parts_with_sidecars(
             atom_nodes,
-            builder.finish(old_nodes.len()),
+            bond_matrix,
             parsed_stereo_neighbors,
             implicit_hydrogen_cache,
             radical_electrons,
