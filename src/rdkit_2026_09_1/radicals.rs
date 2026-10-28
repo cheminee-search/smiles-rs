@@ -620,7 +620,7 @@ fn check_tetrahedral_ligands(
         .map(|atom| (number(atom), atom.isotope_mass_number().unwrap_or(0)))
         .collect();
     let mut colors = equivalence_colors(&seeds);
-    for _ in 0..molecule.nodes().len() / 2 + 1 {
+    for _ in 0..=(molecule.nodes().len() / 2) {
         let keys: Vec<_> = colors
             .iter()
             .zip(atoms)
