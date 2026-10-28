@@ -1,0 +1,248 @@
+{
+  "native_version": "2026.09.1",
+  "native_source": "fece8caa860bdf6c9c82bdb9253f22a0cf87150c",
+  "contract": "Native tetrahedral tag relative to RDKit graph-neighbor order; a distinct terminal lone pair completes the typed fourth position. No native query/sanitization implementation is included.",
+  "source_declarations": "56 declared development strings, reserved independent panel excluded",
+  "cases": [
+    {
+      "smiles": "CC[S@](=O)CCC",
+      "center": 2,
+      "neighbors": [
+        1,
+        3,
+        4
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "CC[S@@](=O)CCC",
+      "center": 2,
+      "neighbors": [
+        1,
+        3,
+        4
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "O=[S@](CC)CCC",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        4
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "O=[S@@](CC)CCC",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        4
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "[S@](=O)(CC)CCC",
+      "center": 0,
+      "neighbors": [
+        1,
+        2,
+        4
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "[S@@](=O)(CC)CCC",
+      "center": 0,
+      "neighbors": [
+        1,
+        2,
+        4
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "CC[S@TH1](=O)CCC",
+      "center": 2,
+      "neighbors": [
+        1,
+        3,
+        4
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "CC[S@TH2](=O)CCC",
+      "center": 2,
+      "neighbors": [
+        1,
+        3,
+        4
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "O=[S@]1CCCCC(C)1",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        6
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "O=[S@@]1CCCCC(C)1",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        6
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "C[S@-](=O)CC",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        3
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "[13CH3][S@](=O)CC",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        3
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "[2H][S@](=O)CC",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        3
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "[S@:9](=O)(CC)CCC",
+      "center": 0,
+      "neighbors": [
+        1,
+        2,
+        4
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "C[S@](=O)CC.CN",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        3
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "C[S@@](=O)CC.NC",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        3
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "[S@](=O)(*)CC",
+      "center": 0,
+      "neighbors": [
+        1,
+        2,
+        3
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "[S@@](=O)(*)CC",
+      "center": 0,
+      "neighbors": [
+        1,
+        2,
+        3
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "[S@]1(=O)CCCCC(C)1",
+      "center": 0,
+      "neighbors": [
+        1,
+        2,
+        6
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "[S@@]1(=O)CCCCC(C)1",
+      "center": 0,
+      "neighbors": [
+        1,
+        2,
+        6
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "CC1CCCC[S@]1=O",
+      "center": 6,
+      "neighbors": [
+        5,
+        7,
+        1
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "CC1CCCC[S@@]1=O",
+      "center": 6,
+      "neighbors": [
+        5,
+        7,
+        1
+      ],
+      "anticlockwise": true
+    },
+    {
+      "smiles": "C[S@]2(=O).Cl2",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        3
+      ],
+      "anticlockwise": false
+    },
+    {
+      "smiles": "C[S@@]2(=O).Cl2",
+      "center": 1,
+      "neighbors": [
+        0,
+        2,
+        3
+      ],
+      "anticlockwise": true
+    }
+  ]
+}

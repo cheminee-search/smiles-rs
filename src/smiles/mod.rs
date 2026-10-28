@@ -58,6 +58,7 @@ mod roots;
 mod spanning_tree;
 mod stereo;
 mod symmetry;
+mod tetrahedral_stereo;
 
 use self::{aromaticity::rdkit_smarts_total_valence, implicit_hydrogens::explicit_valence};
 pub use self::{
@@ -79,6 +80,7 @@ pub use self::{
         McesResult, McesSearchMode, SmilesMces,
     },
     molecular_formula::WildcardMolecularFormulaConversionError,
+    tetrahedral_stereo::TetrahedralNeighbor,
 };
 pub(crate) use self::{
     geometric_traits_impl::{BondMatrixBuilder, build_bond_matrix_from_known_simple_edges},
@@ -775,30 +777,17 @@ impl<AtomPolicy: SmilesAtomPolicy> Smiles<AtomPolicy> {
         atom_id: usize,
         neighbors: [Option<usize>; 4],
     ) -> Option<bool> {
-        let mut anticlockwise = match self.atom_nodes.get(atom_id)?.chirality()? {
-            Chirality::At | Chirality::TH(1) => true,
-            Chirality::AtAt | Chirality::TH(2) => false,
-            _ => return None,
-        };
-        let parsed = self.parsed_stereo_neighbors_row(atom_id);
-        if parsed.len() != 4 {
+        // Preserve the legacy contract: None names a bracket hydrogen, and
+        // an unrepresented fourth position is never inferred as a lone pair.
+        if self.parsed_stereo_neighbors_row(atom_id).len() != 4 {
             return None;
         }
-        let mut order = [0; 4];
-        let mut seen = 0_u8;
-        for (slot, neighbor) in neighbors.into_iter().enumerate() {
-            let neighbor = neighbor.map_or(StereoNeighbor::ExplicitHydrogen, StereoNeighbor::Atom);
-            let index = parsed.iter().position(|&parsed| parsed == neighbor)?;
-            if seen & (1 << index) != 0 {
-                return None;
-            }
-            seen |= 1 << index;
-            for &previous in &order[..slot] {
-                anticlockwise ^= previous > index;
-            }
-            order[slot] = index;
-        }
-        Some(anticlockwise)
+        self.tetrahedral_slots_anticlockwise(
+            atom_id,
+            neighbors.map(|neighbor| {
+                neighbor.map_or(TetrahedralNeighbor::BracketHydrogen, TetrahedralNeighbor::Atom)
+            }),
+        )
     }
 
     /// Returns semantic `E`/`Z` stereo for the requested double bond, if any.

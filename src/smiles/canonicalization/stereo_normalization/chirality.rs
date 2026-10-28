@@ -84,7 +84,7 @@ pub(crate) fn stereo_chirality_normal_form(
         Some(Chirality::At) => {
             if allene_like_stereo_center(smiles, node_id) {
                 Some(Chirality::AL(1))
-            } else if parsed_neighbors.len() == 4 {
+            } else if parsed_neighbors.len() == 4 || smiles.has_tetrahedral_lone_pair(node_id) {
                 Some(Chirality::TH(1))
             } else if parsed_neighbors.len() == 5 {
                 Some(Chirality::TB(1))
@@ -97,7 +97,7 @@ pub(crate) fn stereo_chirality_normal_form(
         Some(Chirality::AtAt) => {
             if allene_like_stereo_center(smiles, node_id) {
                 Some(Chirality::AL(2))
-            } else if parsed_neighbors.len() == 4 {
+            } else if parsed_neighbors.len() == 4 || smiles.has_tetrahedral_lone_pair(node_id) {
                 Some(Chirality::TH(2))
             } else if parsed_neighbors.len() == 5 {
                 Some(Chirality::TB(2))

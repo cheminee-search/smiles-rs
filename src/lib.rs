@@ -37,7 +37,7 @@ pub use crate::{
         InitialProductVertexOrdering, KekulizationError, KekulizationMode, LargestFragmentMetric,
         McesBuilder, McesResult, McesSearchMode, RdkitDefaultAromaticity, RdkitMdlAromaticity,
         RdkitSimpleAromaticity, RingAtomMembership, RingAtomMembershipScratch, RingMembership,
-        Smiles, SmilesComponents, SmilesMces, SymmSssrResult, SymmSssrStatus,
+        Smiles, SmilesComponents, SmilesMces, SymmSssrResult, SymmSssrStatus, TetrahedralNeighbor,
         WildcardAromaticityPerception, WildcardMolecularFormulaConversionError, WildcardSmiles,
         WildcardSmilesComponents,
     },
@@ -62,7 +62,8 @@ pub mod prelude {
         McesBuilder, McesResult, McesSearchMode, RdkitDefaultAromaticity, RdkitMdlAromaticity,
         RdkitSimpleAromaticity, RingAtomMembership, RingAtomMembershipScratch, RingMembership,
         RootError, Smiles, SmilesComponents, SmilesError, SmilesErrorWithSpan, SmilesMces,
-        SubgraphError, SymmSssrResult, SymmSssrStatus, WildcardAromaticityPerception,
-        WildcardMolecularFormulaConversionError, WildcardSmiles, WildcardSmilesComponents,
+        SubgraphError, SymmSssrResult, SymmSssrStatus, TetrahedralNeighbor,
+        WildcardAromaticityPerception, WildcardMolecularFormulaConversionError, WildcardSmiles,
+        WildcardSmilesComponents,
     };
 }
