@@ -332,6 +332,9 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
     /// Returns the canonical graph without orphan bond-direction markers.
     ///
     /// Relative configurations of coupled tetrahedral centers are preserved.
+    /// Alkene directions are transferred when ordinary explicit H is collapsed.
+    /// If collapse would change specified or unspecified alkene geometry,
+    /// ordinary H is retained in the affected connected component instead.
     ///
     /// # Examples
     ///
@@ -394,13 +397,60 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
                 collapsed_count_for_parent[parent].saturating_add(1);
         }
 
-        if collapsed_parent_of.iter().all(Option::is_none) {
-            return self.clone();
-        }
+        loop {
+            if collapsed_parent_of.iter().all(Option::is_none) {
+                return self.clone();
+            }
 
-        let kept_nodes = (0..node_count)
-            .filter(|&node_id| collapsed_parent_of[node_id].is_none())
-            .collect::<Vec<_>>();
+            let kept_nodes = (0..node_count)
+                .filter(|&node_id| collapsed_parent_of[node_id].is_none())
+                .collect::<Vec<_>>();
+            let collapsed = self.collapse_hydrogens_with_mask(
+                &collapsed_parent_of,
+                &collapsed_count_for_parent,
+                &kept_nodes,
+            );
+            let changed = self.changed_double_bond_stereo_endpoints(&collapsed, &kept_nodes);
+            if changed.is_empty() {
+                return collapsed;
+            }
+
+            // Some partial conjugated geometries need explicit H bonds to carry
+            // directions without specifying a neighboring alkene. Retain
+            // ordinary H in each affected component, leaving other components
+            // collapsible.
+            let mut seen = vec![false; node_count];
+            let mut stack = changed;
+            let mut retained = false;
+            while let Some(node) = stack.pop() {
+                if core::mem::replace(&mut seen[node], true) {
+                    continue;
+                }
+                if let Some(parent) = collapsed_parent_of[node].take() {
+                    collapsed_count_for_parent[parent] -= 1;
+                    retained = true;
+                }
+                stack.extend(self.edges_for_node(node).filter_map(|edge| edge.other(node)));
+            }
+            if !retained {
+                // A change outside the removable-H components cannot be
+                // repaired by collapsing more H. Preserve the original
+                // geometry.
+                return self.clone();
+            }
+        }
+    }
+
+    fn collapse_hydrogens_with_mask(
+        &self,
+        collapsed_parent_of: &[Option<usize>],
+        collapsed_count_for_parent: &[u8],
+        kept_nodes: &[usize],
+    ) -> Self {
+        let node_count = self.nodes().len();
+        let directional_overrides =
+            self.directional_overrides_after_hydrogen_collapse(collapsed_parent_of);
+
         let mut new_index_of_old_node = vec![usize::MAX; node_count];
         for (new_index, old_node) in kept_nodes.iter().copied().enumerate() {
             new_index_of_old_node[old_node] = new_index;
@@ -410,11 +460,19 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             .iter()
             .copied()
             .map(|old_node| {
+                let collapsed_h = collapsed_count_for_parent[old_node];
+                // Bracketing an organic-subset parent suppresses its implicit
+                // H inference. Carry the original inferred H into the bracket
+                // count as well as the H vertices being removed. Bracketed
+                // atoms already have the policy's intended zero inference.
+                let inferred_h =
+                    if collapsed_h == 0 { 0 } else { self.implicit_hydrogen_count(old_node) };
                 atom_with_hydrogen_count(
                     self.atom_nodes[old_node],
                     self.atom_nodes[old_node]
                         .hydrogen_count()
-                        .saturating_add(collapsed_count_for_parent[old_node]),
+                        .saturating_add(inferred_h)
+                        .saturating_add(collapsed_h),
                 )
             })
             .collect::<Vec<_>>();
@@ -427,11 +485,25 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             {
                 continue;
             }
+            let mut bond = entry.bond();
+            if matches!(bond, Bond::Up | Bond::Down)
+                && !super::render_plan::preserve_raw_directional_single(
+                    self,
+                    &directional_overrides,
+                    row,
+                    column,
+                )
+            {
+                bond = Bond::Single;
+            }
+            if let Some(override_bond) = directional_overrides.get(row, column) {
+                bond = override_bond;
+            }
             builder
                 .push_edge_with_descriptor(
                     new_index_of_old_node[row],
                     new_index_of_old_node[column],
-                    entry.descriptor(),
+                    entry.descriptor().with_bond(bond),
                     None,
                 )
                 .unwrap_or_else(|_| {
@@ -476,6 +548,47 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
             parsed_stereo_neighbors,
             radical_electrons,
         )
+    }
+
+    /// Compare geometry using original node IDs, including the absence of a
+    /// record. Configurations are relative to their reference substituents;
+    /// changing either reference reverses that side's parity.
+    fn changed_double_bond_stereo_endpoints(
+        &self,
+        collapsed: &Self,
+        original_nodes: &[usize],
+    ) -> Vec<usize> {
+        let original = self.double_bond_stereo_records();
+        let projected = collapsed.double_bond_stereo_records();
+        let mut changed = Vec::new();
+        for record in &original {
+            let a = record.side_a();
+            let b = record.side_b();
+            let matching = projected.iter().find(|other| {
+                original_nodes[other.side_a().endpoint()] == a.endpoint()
+                    && original_nodes[other.side_b().endpoint()] == b.endpoint()
+            });
+            let preserved = matching.is_some_and(|other| {
+                let expected_same = matches!(record.config(), super::DoubleBondStereoConfig::Z)
+                    ^ (original_nodes[other.side_a().reference_atom()] != a.reference_atom())
+                    ^ (original_nodes[other.side_b().reference_atom()] != b.reference_atom());
+                expected_same == matches!(other.config(), super::DoubleBondStereoConfig::Z)
+            });
+            if !preserved {
+                changed.extend([a.endpoint(), b.endpoint()]);
+            }
+        }
+        for record in &projected {
+            let a = original_nodes[record.side_a().endpoint()];
+            let b = original_nodes[record.side_b().endpoint()];
+            if !original
+                .iter()
+                .any(|other| other.side_a().endpoint() == a && other.side_b().endpoint() == b)
+            {
+                changed.extend([a, b]);
+            }
+        }
+        changed
     }
 
     fn collapsible_explicit_hydrogen_parent(&self, node_id: usize) -> Option<usize> {

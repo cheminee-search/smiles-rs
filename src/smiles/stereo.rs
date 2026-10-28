@@ -166,7 +166,81 @@ impl<AtomPolicy: crate::smiles::SmilesAtomPolicy> Smiles<AtomPolicy> {
         if alternatives.next().is_none() { alternative } else { reference }
     }
 
+    /// Projects semantic alkene directions onto bonds that survive terminal-H
+    /// collapse. Keep original node indices here: removing nodes preserves
+    /// their relative order, including the orientation of each stored bond.
+    pub(super) fn directional_overrides_after_hydrogen_collapse(
+        &self,
+        collapsed_parent_of: &[Option<usize>],
+    ) -> DirectionalBondOverrides {
+        let records = self.double_bond_stereo_records();
+        if records.is_empty() {
+            return DirectionalBondOverrides::default();
+        }
 
+        let node_count = self.nodes().len();
+        let unspecified = self.unspecified_double_bond_endpoints(&records);
+        let mut semantic_endpoints = vec![false; node_count];
+        let mut constraints = Vec::with_capacity(records.len());
+        for record in records {
+            let side_a = record.side_a();
+            let side_b = record.side_b();
+            let surviving_reference = |endpoint: usize,
+                                       opposite_endpoint: usize,
+                                       reference: usize| {
+                let reference = self.directional_reference_avoiding_unspecified(
+                    endpoint,
+                    opposite_endpoint,
+                    reference,
+                    &unspecified,
+                );
+                if collapsed_parent_of[reference].is_none() {
+                    Some(reference)
+                } else {
+                    self.edges_for_node(endpoint).filter_map(|edge| edge.other(endpoint)).find(
+                        |&neighbor| {
+                            neighbor != opposite_endpoint && collapsed_parent_of[neighbor].is_none()
+                        },
+                    )
+                }
+            };
+            let Some(reference_a) =
+                surviving_reference(side_a.endpoint(), side_b.endpoint(), side_a.reference_atom())
+            else {
+                continue;
+            };
+            let Some(reference_b) =
+                surviving_reference(side_b.endpoint(), side_a.endpoint(), side_b.reference_atom())
+            else {
+                continue;
+            };
+            semantic_endpoints[side_a.endpoint()] = true;
+            semantic_endpoints[side_b.endpoint()] = true;
+            constraints.push(DirectionalParityConstraint {
+                left_edge_key: crate::smiles::edge_key(side_a.endpoint(), reference_a),
+                right_edge_key: crate::smiles::edge_key(side_b.endpoint(), reference_b),
+                // Replacing either reference by the other substituent reverses
+                // that side's direction. Solve all records jointly because one
+                // surviving single bond can serve two neighboring alkenes.
+                same_parity: matches!(
+                    record.config(),
+                    crate::smiles::double_bond_stereo::DoubleBondStereoConfig::Z
+                ) ^ (reference_a != side_a.reference_atom())
+                    ^ (reference_b != side_b.reference_atom())
+                    ^ (side_a.endpoint() > reference_a)
+                    ^ (side_b.endpoint() > reference_b),
+            });
+        }
+
+        DirectionalBondOverrides {
+            rows: directional_override_rows_from_parity_constraints(
+                node_count,
+                &constraints,
+                &(0..node_count).collect::<Vec<_>>(),
+            ),
+            semantic_endpoints,
+        }
+    }
 }
 
 pub(super) fn directional_override_rows_from_parity_constraints(

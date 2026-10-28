@@ -1,0 +1,414 @@
+{
+  "scope": "Owner-declared development seeds58/59/60 and all original atom roots; no new chemical seeds or reserved inputs.",
+  "rdkit_version": "2026.09.1",
+  "rdkit_build": "Linux|6.17.0-1022-azure|UNIX|GNU|64-bit",
+  "parameters": {
+    "sanitize": true,
+    "removeHs": false,
+    "canonical": false,
+    "isomericSmiles": true
+  },
+  "deduplication": "Exact emitted string only; all duplicate origins retained.",
+  "script_sha256": "183bed39d403d9109256c9bce37d78a4df962eb747c5110810703a6b7510b03c",
+  "seeds": [
+    {
+      "id": "partial-coupled-retained-marker",
+      "input": "F/C([H])=C(/[H])C([H])=C(\\[2H])Cl",
+      "source_atom_count": 10
+    },
+    {
+      "id": "unspecified-middle-triene",
+      "input": "F/C([H])=C(/[H])C([H])=C([H])C(/[H])=C(\\[H])Cl",
+      "source_atom_count": 14
+    },
+    {
+      "id": "unspecified-middle-triene-isotopic",
+      "input": "F/C([2H])=C(/[2H])C([2H])=C([2H])C(/[2H])=C(\\[2H])Cl",
+      "source_atom_count": 14
+    }
+  ],
+  "root_attempts": 38,
+  "variant_count": 38,
+  "variants": [
+    {
+      "id": "partial-rooted-000",
+      "input": "F/C([H])=C(/[H])C([H])=C([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 0
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-001",
+      "input": "C(/F)([H])=C(\\[H])C([H])=C([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 1
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-002",
+      "input": "[H]/C(F)=C(\\[H])C([H])=C([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 2
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-003",
+      "input": "C(=C(\\F)[H])(/[H])C([H])=C([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 3
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-004",
+      "input": "[H]/C(=C(/F)[H])C([H])=C([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 4
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-005",
+      "input": "C(/C(=C(\\F)[H])[H])([H])=C([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 5
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-006",
+      "input": "[H]C(/C(=C(\\F)[H])[H])=C([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 6
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-007",
+      "input": "C(=C(/C(=C(\\F)[H])[H])[H])([2H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 7
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-008",
+      "input": "[2H]C(=C(/C(=C(\\F)[H])[H])[H])Cl",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 8
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-009",
+      "input": "ClC(=C(/C(=C(\\F)[H])[H])[H])[2H]",
+      "origins": [
+        {
+          "seed_id": "partial-coupled-retained-marker",
+          "root_atom": 9
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-010",
+      "input": "F/C([H])=C(/[H])C([H])=C([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 0
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-011",
+      "input": "C(/F)([H])=C(\\[H])C([H])=C([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 1
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-012",
+      "input": "[H]/C(F)=C(\\[H])C([H])=C([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 2
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-013",
+      "input": "C(=C(\\F)[H])(/[H])C([H])=C([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 3
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-014",
+      "input": "[H]/C(=C(/F)[H])C([H])=C([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 4
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-015",
+      "input": "C(C(=C(\\F)[H])/[H])([H])=C([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 5
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-016",
+      "input": "[H]C(C(=C(\\F)[H])/[H])=C([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 6
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-017",
+      "input": "C(=C(C(=C(\\F)[H])/[H])[H])([H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 7
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-018",
+      "input": "[H]C(=C(C(=C(\\F)[H])/[H])[H])/C([H])=C(\\[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 8
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-019",
+      "input": "C(C(=C(/C(=C(\\F)[H])[H])[H])[H])(\\[H])=C(/[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 9
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-020",
+      "input": "[H]/C(C(=C(/C(=C(\\F)[H])[H])[H])[H])=C(/[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 10
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-021",
+      "input": "C(=C(C(=C(/C(=C(\\F)[H])[H])[H])[H])\\[H])(/[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 11
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-022",
+      "input": "[H]/C(=C(C(=C(/C(=C(\\F)[H])[H])[H])[H])/[H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 12
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-023",
+      "input": "Cl/C(=C(C(=C(/C(=C(\\F)[H])[H])[H])[H])\\[H])[H]",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene",
+          "root_atom": 13
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-024",
+      "input": "F/C([2H])=C(/[2H])C([2H])=C([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 0
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-025",
+      "input": "C(/F)([2H])=C(\\[2H])C([2H])=C([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 1
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-026",
+      "input": "[2H]/C(F)=C(\\[2H])C([2H])=C([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 2
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-027",
+      "input": "C(=C(\\F)[2H])(/[2H])C([2H])=C([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 3
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-028",
+      "input": "[2H]/C(=C(/F)[2H])C([2H])=C([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 4
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-029",
+      "input": "C(C(=C(\\F)[2H])/[2H])([2H])=C([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 5
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-030",
+      "input": "[2H]C(C(=C(\\F)[2H])/[2H])=C([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 6
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-031",
+      "input": "C(=C(C(=C(\\F)[2H])/[2H])[2H])([2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 7
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-032",
+      "input": "[2H]C(=C(C(=C(\\F)[2H])/[2H])[2H])/C([2H])=C(\\[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 8
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-033",
+      "input": "C(C(=C(/C(=C(\\F)[2H])[2H])[2H])[2H])(\\[2H])=C(/[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 9
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-034",
+      "input": "[2H]/C(C(=C(/C(=C(\\F)[2H])[2H])[2H])[2H])=C(/[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 10
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-035",
+      "input": "C(=C(C(=C(/C(=C(\\F)[2H])[2H])[2H])[2H])\\[2H])(/[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 11
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-036",
+      "input": "[2H]/C(=C(C(=C(/C(=C(\\F)[2H])[2H])[2H])[2H])/[2H])Cl",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 12
+        }
+      ]
+    },
+    {
+      "id": "partial-rooted-037",
+      "input": "Cl/C(=C(C(=C(/C(=C(\\F)[2H])[2H])[2H])[2H])\\[2H])[2H]",
+      "origins": [
+        {
+          "seed_id": "unspecified-middle-triene-isotopic",
+          "root_atom": 13
+        }
+      ]
+    }
+  ]
+}
