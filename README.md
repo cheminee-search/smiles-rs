@@ -51,6 +51,18 @@ This staged API adds a constructor and cyclic-component error variants to the
 existing non-exhaustive `RadicalPreparationError` enum; `try_parse` keeps its
 acyclic admission and errors.
 
+`try_parse_with_tetrahedral_carbocycles` adds checked `@`, `@@`, `@TH1` and
+`@TH2` centers in the same saturated carbon cyclic components. All four ligand
+slots must be represented, and an unrooted, stereo-neutral graph refinement must
+distinguish them using element/isotope seeds, graph neighbors and checked total H.
+Refinement keeps the native legacy initial-rank round bound (atom-count / 2 + 1).
+Atom maps, bracket spelling, root markers and stereo tags cannot create a distinction.
+Unresolved ties, incomplete slots, other coordination classes and stereo in
+acyclic companions remain typed exclusions. No stereo tag is cleared.
+`checked_tetrahedral_neighbors` exposes preserved source slots only for this
+constructor's certified centers. The earlier constructors retain their domains;
+this extension does not claim CIP, relative-stereo or general native sanitization.
+
 | Feature | Effect |
 | ------- | ------ |
 | `datasets` | Streams PubChem, ZINC20, COCONUT, LOTUS and MassSpecGym from a local cache, requires `std`. See [`datasets`](https://docs.rs/smiles-rs/latest/smiles_rs/datasets/). |

@@ -6,8 +6,8 @@ use thiserror::Error;
 
 use super::element_data::ELEMENTS;
 use crate::{
-    NitrogenOxideCleanupError, Smiles, SmilesErrorWithSpan,
-    atom::{Atom, AtomSyntax},
+    NitrogenOxideCleanupError, Smiles, SmilesErrorWithSpan, TetrahedralNeighbor,
+    atom::{Atom, AtomSyntax, bracketed::chirality::Chirality},
     bond::Bond,
 };
 
@@ -83,6 +83,19 @@ pub enum RadicalPreparationError {
     #[error("stereochemistry at atom {atom} in a cyclic component is unsupported")]
     UnsupportedCyclicStereo {
         /// Current/source atom index, including any attached tail.
+        atom: usize,
+    },
+    /// Only complete tetrahedral carbon slots in cyclic components are checked.
+    #[error("tetrahedral stereochemistry at atom {atom} is outside checked admission")]
+    UnsupportedTetrahedralStereo {
+        /// Current/source atom index.
+        atom: usize,
+    },
+    /// Stereo-neutral graph refinement did not distinguish all four ligands.
+    /// This is an exclusion, not a claim that the atom cannot be stereogenic.
+    #[error("tetrahedral ligands at atom {atom} are not independently distinguished")]
+    UnresolvedTetrahedralLigands {
+        /// Current/source atom index.
         atom: usize,
     },
     /// Checked H and radical state did not establish saturated cyclic carbon.
@@ -239,20 +252,24 @@ impl AtomRadicalState {
 /// [`Self::try_parse`] admits only acyclic graphs.
 /// [`Self::try_parse_with_saturated_carbocycles`] additionally admits
 /// saturated, neutral carbon cyclic components without explicit stereo; its
-/// restrictions cover their attached tails as well. Only B/C/N/O/P/S/F/Cl/Br/I
-/// may be bonded; other concrete elements may be isolated. The supported
-/// N-oxide cleanup runs before checked native valence, hydrogen and radical
-/// rules. Other cleanup families are conservatively rejected. Every initialized
-/// native valence cache must fit 0..=127.
+/// restrictions cover their attached tails as well. The additive
+/// [`Self::try_parse_with_tetrahedral_carbocycles`] checks a conservative
+/// subset of tetrahedral centers within those components. Only
+/// B/C/N/O/P/S/F/Cl/Br/I may be bonded; other concrete elements may be
+/// isolated. The supported N-oxide cleanup runs before checked native valence,
+/// hydrogen and radical rules. Other cleanup families are conservatively
+/// rejected. Every initialized native valence cache must fit 0..=127.
 ///
 /// This certifies indexed element/isotope/charge/bond/H/radical metadata in
-/// that domain, not full sanitization, stereochemistry, CIP or normalization.
-/// Radical counts remain separate from the graph's legacy radical policy.
-/// There is no admission constructor for arbitrary transformed graphs.
+/// that domain, not full sanitization, general stereochemistry, CIP or
+/// normalization. Radical counts remain separate from the graph's legacy
+/// radical policy. There is no admission constructor for arbitrary transformed
+/// graphs.
 #[derive(Debug, Clone)]
 pub struct RadicalPreparedSmiles {
     molecule: Smiles,
     atoms: Vec<AtomRadicalState>,
+    checked_tetrahedral: bool,
 }
 
 impl RadicalPreparedSmiles {
@@ -290,6 +307,35 @@ impl RadicalPreparedSmiles {
         text: &str,
     ) -> Result<Self, RadicalPreparationError> {
         Self::parse_with_cycles(text, CycleAdmission::SaturatedCarbocycles)
+    }
+
+    /// Also admits checked tetrahedral tags in saturated carbon components.
+    ///
+    /// The whole cyclic-component restrictions of
+    /// [`Self::try_parse_with_saturated_carbocycles`] remain in force. Tags
+    /// must be `@`, `@@`, `@TH1` or `@TH2`, with four graph neighbors or three
+    /// graph neighbors and one bracket H. Every tagged center must belong to a
+    /// cyclic component, including when the center itself is on an attached
+    /// tail.
+    ///
+    /// An unrooted, stereo-neutral graph refinement must distinguish the four
+    /// ligands. Element/isotope seeds are refined with graph neighbors and
+    /// checked total H, for at most atom-count / 2 + 1 rounds. Atom maps,
+    /// source syntax, stereo tags and an individualized center never
+    /// distinguish them. Ties are conservatively excluded, including symmetric
+    /// or relative-stereo environments that this certificate cannot resolve. No
+    /// tag is removed or reoriented. This does not establish CIP labels or
+    /// general sanitization.
+    ///
+    /// # Errors
+    /// Returns the existing checked preparation errors, or an indexed error
+    /// for unsupported tags/slots, tagged acyclic components or unresolved
+    /// ligand equivalence. Both matching chirality policies use this same
+    /// domain.
+    pub fn try_parse_with_tetrahedral_carbocycles(
+        text: &str,
+    ) -> Result<Self, RadicalPreparationError> {
+        Self::parse_with_cycles(text, CycleAdmission::TetrahedralCarbocycles)
     }
 
     fn parse_with_cycles(
@@ -366,7 +412,11 @@ impl RadicalPreparedSmiles {
         // Assigned atoms have NoImplicit=true; preserved atoms retain zero
         // radicals. Consequently the final property update has identical H
         // inputs. No metadata is installed into the legacy graph sidecar.
-        Ok(Self { molecule, atoms })
+        let checked_tetrahedral = matches!(cycles, CycleAdmission::TetrahedralCarbocycles);
+        if checked_tetrahedral {
+            check_tetrahedral_ligands(&molecule, &atoms)?;
+        }
+        Ok(Self { molecule, atoms, checked_tetrahedral })
     }
 
     /// Borrows the exact graph whose indexed metadata this object owns.
@@ -379,6 +429,17 @@ impl RadicalPreparedSmiles {
     #[must_use]
     pub fn atom_states(&self) -> &[AtomRadicalState] {
         &self.atoms
+    }
+
+    /// Returns the preserved source slots for one checked tetrahedral center.
+    ///
+    /// Only [`Self::try_parse_with_tetrahedral_carbocycles`] certifies these
+    /// centers. Earlier constructors, untagged atoms and out-of-range indices
+    /// return `None`. Orientation is still read from the exact owned graph via
+    /// [`Smiles::tetrahedral_slots_anticlockwise`].
+    #[must_use]
+    pub fn checked_tetrahedral_neighbors(&self, atom: usize) -> Option<[TetrahedralNeighbor; 4]> {
+        self.checked_tetrahedral.then(|| self.molecule.tetrahedral_stereo_neighbors(atom)).flatten()
     }
 
     /// Consumes the capability and returns an ordinary, unqualified graph.
@@ -400,6 +461,7 @@ struct Origin {
 enum CycleAdmission {
     Reject,
     SaturatedCarbocycles,
+    TetrahedralCarbocycles,
 }
 
 fn number(atom: &Atom) -> u8 {
@@ -503,13 +565,27 @@ fn check_domain(
     }
     for (id, atom) in molecule.nodes().iter().enumerate() {
         if !cyclic[id] {
+            if matches!(cycles, CycleAdmission::TetrahedralCarbocycles)
+                && atom.chirality().is_some()
+            {
+                return Err(RadicalPreparationError::UnsupportedTetrahedralStereo { atom: id });
+            }
             continue;
         }
         if number(atom) != 6 || atom.charge_value() != 0 {
             return Err(RadicalPreparationError::UnsupportedCyclicAtom { atom: id });
         }
         if atom.chirality().is_some() {
-            return Err(RadicalPreparationError::UnsupportedCyclicStereo { atom: id });
+            if !matches!(cycles, CycleAdmission::TetrahedralCarbocycles) {
+                return Err(RadicalPreparationError::UnsupportedCyclicStereo { atom: id });
+            }
+            if !matches!(
+                atom.chirality(),
+                Some(Chirality::At | Chirality::AtAt | Chirality::TH(1 | 2))
+            ) || molecule.tetrahedral_stereo_neighbors(id).is_none()
+            {
+                return Err(RadicalPreparationError::UnsupportedTetrahedralStereo { atom: id });
+            }
         }
         for edge in molecule.edges_for_node(id) {
             if edge.bond() != Bond::Single {
@@ -521,6 +597,87 @@ fn check_domain(
         }
     }
     Ok(cyclic)
+}
+
+// Conservative equality partition for RDKit 2026.09.1's initial legacy CIP
+// assignment (Chirality.cpp buildCIPInvariants/iterateCIPRanks; BSD-3-Clause).
+// Within neutral carbon/single-bond components, each native round compares
+// prior ranks, twice each graph neighbor's rank and one zero per total H.
+// Comparing neighbor multisets and H separately has the same equality there.
+// Element/isotope seeds omit native atom-map distinctions conservatively.
+// We retain the native round bound and never individualize the center: rooted
+// constitutional distinctions alone do not prove native tag retention.
+fn check_tetrahedral_ligands(
+    molecule: &Smiles,
+    atoms: &[AtomRadicalState],
+) -> Result<(), RadicalPreparationError> {
+    if molecule.nodes().iter().all(|atom| atom.chirality().is_none()) {
+        return Ok(());
+    }
+    let seeds: Vec<_> = molecule
+        .nodes()
+        .iter()
+        .map(|atom| (number(atom), atom.isotope_mass_number().unwrap_or(0)))
+        .collect();
+    let mut colors = equivalence_colors(&seeds);
+    for _ in 0..molecule.nodes().len() / 2 + 1 {
+        let keys: Vec<_> = colors
+            .iter()
+            .zip(atoms)
+            .enumerate()
+            .map(|(id, (&color, state))| {
+                let mut neighbors: Vec<_> = molecule
+                    .edges_for_node(id)
+                    .map(|edge| (bond_value(edge.bond()), colors[edge.target()]))
+                    .collect();
+                neighbors.sort_unstable();
+                let hydrogens =
+                    u16::from(state.explicit_hydrogens()) + u16::from(state.implicit_hydrogens());
+                (color, neighbors, hydrogens)
+            })
+            .collect();
+        let next = equivalence_colors(&keys);
+        // Prior color is part of every key: classes only split. Equal class
+        // counts therefore prove stabilization, regardless of numeric ranks.
+        let stable = next.iter().max() == colors.iter().max();
+        colors = next;
+        if stable {
+            break;
+        }
+    }
+    for (center, atom) in molecule.nodes().iter().enumerate() {
+        if atom.chirality().is_none() {
+            continue;
+        }
+        let slots = molecule
+            .tetrahedral_stereo_neighbors(center)
+            .ok_or(RadicalPreparationError::UnsupportedTetrahedralStereo { atom: center })?;
+        let ligands = slots.map(|slot| {
+            match slot {
+                TetrahedralNeighbor::Atom(atom) => Some(colors[atom]),
+                TetrahedralNeighbor::BracketHydrogen => None,
+                TetrahedralNeighbor::LonePair => {
+                    unreachable!("neutral saturated carbon has no lone pair")
+                }
+            }
+        });
+        if ligands.iter().enumerate().any(|(id, ligand)| ligands[..id].contains(ligand)) {
+            return Err(RadicalPreparationError::UnresolvedTetrahedralLigands { atom: center });
+        }
+    }
+    Ok(())
+}
+
+fn equivalence_colors<T: Ord>(keys: &[T]) -> Vec<usize> {
+    let mut order: Vec<_> = (0..keys.len()).collect();
+    order.sort_unstable_by(|&left, &right| keys[left].cmp(&keys[right]));
+    let mut colors = alloc::vec![0; keys.len()];
+    let mut color = 0;
+    for pair in order.windows(2) {
+        color += usize::from(keys[pair[0]] != keys[pair[1]]);
+        colors[pair[1]] = color;
+    }
+    colors
 }
 
 fn reject_other_cleanup(molecule: &Smiles) -> Result<(), RadicalPreparationError> {
