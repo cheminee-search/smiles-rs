@@ -16,6 +16,8 @@ pub mod bond;
 pub mod datasets;
 pub mod errors;
 pub(crate) mod parser;
+#[cfg(feature = "rdkit-2026-09-1-mass")]
+pub mod rdkit_2026_09_1;
 pub mod smiles;
 pub mod token;
 

@@ -1042,6 +1042,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "molecular-formulas"
+version = "0.3.0"
+dependencies = [
+ "elements_rs",
+ "num-traits",
+ "thiserror",
+]
+
+[[package]]
 name = "multi_ranged"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1621,7 +1630,8 @@ dependencies = [
  "geometric-traits",
  "hashbrown",
  "indicatif",
- "molecular-formulas",
+ "molecular-formulas 0.1.10",
+ "molecular-formulas 0.3.0",
  "rayon",
  "reqwest",
  "serde",

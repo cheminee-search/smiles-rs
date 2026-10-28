@@ -18,6 +18,7 @@ all-features = true
 [features]
 default = []
 fuzzing = []
+rdkit-2026-09-1-mass = ["dep:molecular-formulas-native"]
 datasets = [
     "dep:flate2",
     "dep:indicatif",
@@ -37,6 +38,7 @@ geometric-traits = { version = "0.2.3", default-features = false, features = ["a
 hashbrown = { version = "0.17.0", default-features = false, features = ["default-hasher", "inline-more"] }
 indicatif = { version = "0.18.4", optional = true }
 molecular-formulas = { version = "0.1.10", default-features = false }
+molecular-formulas-native = { package = "molecular-formulas", version = "=0.3.0", path = "../molecular-formulas-native-mass", default-features = false, optional = true }
 reqwest = { version = "0.13.3", optional = true, default-features = false, features = ["blocking", "rustls"] }
 smallvec = { version = "1.15.1", default-features = false, features = ["union"] }
 tar = { version = "0.4.45", optional = true }

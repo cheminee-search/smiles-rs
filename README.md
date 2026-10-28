@@ -36,3 +36,9 @@ assert_eq!(formula.to_string(), "C₂H₆O");
 | ------- | ------ |
 | `datasets` | Streams PubChem, ZINC20, COCONUT, LOTUS and MassSpecGym from a local cache, requires `std`. See [`datasets`](https://docs.rs/smiles-rs/latest/smiles_rs/datasets/). |
 | `fuzzing` | Exposes the parser internals the fuzz targets drive. |
+
+## Optional recorded native-vintage weights
+
+The `rdkit-2026-09-1-mass` feature provides an ordered raw-graph weight projection
+with an explicit paired local dependency. See [the source and phase contract](docs/recorded-native-weights.md).
+Existing scientific formula conversions and default behavior are unchanged.
