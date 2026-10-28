@@ -1,0 +1,707 @@
+{
+  "native_version": "2026.09.1",
+  "native_source": "fece8caa860bdf6c9c82bdb9253f22a0cf87150c",
+  "phase": "MolFromSmiles(sanitize=False,removeHs=False,parseName=False,allowCXSMILES=False), then UpdatePropertyCache(strict=False). No sanitize, H removal, normalization or native descriptor preparation.",
+  "declarations_sha256": "9e1c90f59ec7d685040c146dda50764cf74ce11da57ef15634e06937b1114c8a",
+  "generator_sha256": "13178c6c447f3620f8bc43a726804521736c97c0785734368189232e2348b2bf",
+  "qualification": "Raw metadata arithmetic on declared inputs, not sanitized descriptor parity. Known concrete-parser exclusions remain explicit rows.",
+  "rows": [
+    {
+      "id": "golden-1",
+      "smiles": "CCO",
+      "counts": {
+        "graph_atoms": 3,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 6,
+        "heavy_atoms": 3,
+        "carbon_atoms": 2,
+        "carbon_total_connectivity_four": 2,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 1,
+        "atoms_including_hydrogens": 9,
+        "carbon_total_connectivity_four_fraction_bits": 4607182418800017408
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "golden-2",
+      "smiles": "c1ccccc1",
+      "counts": {
+        "graph_atoms": 6,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 6,
+        "heavy_atoms": 6,
+        "carbon_atoms": 6,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 12,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "golden-3",
+      "smiles": "CC(=O)[O-].[Na+]",
+      "counts": {
+        "graph_atoms": 5,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 3,
+        "heavy_atoms": 5,
+        "carbon_atoms": 2,
+        "carbon_total_connectivity_four": 1,
+        "nitrogen_oxygen_atoms": 2,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 8,
+        "carbon_total_connectivity_four_fraction_bits": 4602678819172646912
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "golden-4",
+      "smiles": "C[C@H](O)C(=O)O",
+      "counts": {
+        "graph_atoms": 6,
+        "bracket_hydrogens": 1,
+        "inferred_hydrogens": 5,
+        "heavy_atoms": 6,
+        "carbon_atoms": 3,
+        "carbon_total_connectivity_four": 2,
+        "nitrogen_oxygen_atoms": 3,
+        "hydrogens_on_nitrogen_oxygen": 2,
+        "atoms_including_hydrogens": 12,
+        "carbon_total_connectivity_four_fraction_bits": 4604180019048437077
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "golden-5",
+      "smiles": "C1=CC=CN=C1",
+      "counts": {
+        "graph_atoms": 6,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 5,
+        "heavy_atoms": 6,
+        "carbon_atoms": 5,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 11,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "golden-6",
+      "smiles": "[NH4+].[Cl-]",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 4,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 2,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 4,
+        "atoms_including_hydrogens": 6,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "golden-7",
+      "smiles": "C[N+](C)(C)C",
+      "counts": {
+        "graph_atoms": 5,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 12,
+        "heavy_atoms": 5,
+        "carbon_atoms": 4,
+        "carbon_total_connectivity_four": 4,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 17,
+        "carbon_total_connectivity_four_fraction_bits": 4607182418800017408
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "golden-8",
+      "smiles": "O=C1NC=CC=C1",
+      "counts": {
+        "graph_atoms": 7,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 5,
+        "heavy_atoms": 7,
+        "carbon_atoms": 5,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 2,
+        "hydrogens_on_nitrogen_oxygen": 1,
+        "atoms_including_hydrogens": 12,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-0",
+      "smiles": "N",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 3,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-1",
+      "smiles": "[NH3]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 3,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-2",
+      "smiles": "[H]N([H])[H]",
+      "counts": {
+        "graph_atoms": 4,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-3",
+      "smiles": "[2H]N([H])[H]",
+      "counts": {
+        "graph_atoms": 4,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-4",
+      "smiles": "[H-].[Na+]",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 2,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-5",
+      "smiles": "C[NH3+]",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 3,
+        "inferred_hydrogens": 3,
+        "heavy_atoms": 2,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 1,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 8,
+        "carbon_total_connectivity_four_fraction_bits": 4607182418800017408
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-6",
+      "smiles": "[NH4+]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 4,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 4,
+        "atoms_including_hydrogens": 5,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-7",
+      "smiles": "[O-]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-8",
+      "smiles": "[OH]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 1,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 1,
+        "atoms_including_hydrogens": 2,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-9",
+      "smiles": "[CH3]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 3,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-10",
+      "smiles": "[C]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-11",
+      "smiles": "[13CH4]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 4,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 1,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 5,
+        "carbon_total_connectivity_four_fraction_bits": 4607182418800017408
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-12",
+      "smiles": "C",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 4,
+        "heavy_atoms": 1,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 1,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 5,
+        "carbon_total_connectivity_four_fraction_bits": 4607182418800017408
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-13",
+      "smiles": "C=C",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 4,
+        "heavy_atoms": 2,
+        "carbon_atoms": 2,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 6,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-14",
+      "smiles": "C#N",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 1,
+        "heavy_atoms": 2,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 3,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-15",
+      "smiles": "[CH3+]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 3,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-16",
+      "smiles": "[CH3-]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 3,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-17",
+      "smiles": "O=C=O",
+      "counts": {
+        "graph_atoms": 3,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 3,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 2,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 3,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-18",
+      "smiles": "ClCl",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 2,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 2,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-19",
+      "smiles": "c1cc[nH]c1",
+      "counts": {
+        "graph_atoms": 5,
+        "bracket_hydrogens": 1,
+        "inferred_hydrogens": 4,
+        "heavy_atoms": 5,
+        "carbon_atoms": 4,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 1,
+        "atoms_including_hydrogens": 10,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "planned-20",
+      "smiles": "[Fe+2]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "oxygen-fragments-999",
+      "smiles": "O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O",
+      "counts": {
+        "graph_atoms": 999,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 1998,
+        "heavy_atoms": 999,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 999,
+        "hydrogens_on_nitrogen_oxygen": 1998,
+        "atoms_including_hydrogens": 2997,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "oxygen-fragments-1000",
+      "smiles": "O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O",
+      "counts": {
+        "graph_atoms": 1000,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 2000,
+        "heavy_atoms": 1000,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1000,
+        "hydrogens_on_nitrogen_oxygen": 2000,
+        "atoms_including_hydrogens": 3000,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "oxygen-fragments-1001",
+      "smiles": "O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O.O",
+      "counts": {
+        "graph_atoms": 1001,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 2002,
+        "heavy_atoms": 1001,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1001,
+        "hydrogens_on_nitrogen_oxygen": 2002,
+        "atoms_including_hydrogens": 3003,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-0",
+      "smiles": "C(C)(C)(C)(C)C",
+      "counts": {
+        "graph_atoms": 6,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 15,
+        "heavy_atoms": 6,
+        "carbon_atoms": 6,
+        "carbon_total_connectivity_four": 5,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 21,
+        "carbon_total_connectivity_four_fraction_bits": 4605681218924227243
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-1",
+      "smiles": "[H]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 0,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-2",
+      "smiles": "[H][H]",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 0,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 2,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-3",
+      "smiles": "[2H]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 0,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-4",
+      "smiles": "[H-]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 0,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-5",
+      "smiles": "[H+]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 0,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-6",
+      "smiles": "[H:7]N",
+      "counts": {
+        "graph_atoms": 2,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 2,
+        "heavy_atoms": 1,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 1,
+        "hydrogens_on_nitrogen_oxygen": 3,
+        "atoms_including_hydrogens": 4,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": true
+    },
+    {
+      "id": "boundary-7",
+      "smiles": "*",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 0,
+        "carbon_atoms": 0,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": false
+    },
+    {
+      "id": "boundary-8",
+      "smiles": "[999C]",
+      "counts": {
+        "graph_atoms": 1,
+        "bracket_hydrogens": 0,
+        "inferred_hydrogens": 0,
+        "heavy_atoms": 1,
+        "carbon_atoms": 1,
+        "carbon_total_connectivity_four": 0,
+        "nitrogen_oxygen_atoms": 0,
+        "hydrogens_on_nitrogen_oxygen": 0,
+        "atoms_including_hydrogens": 1,
+        "carbon_total_connectivity_four_fraction_bits": 0
+      },
+      "concrete_parser_supported": false
+    }
+  ]
+}

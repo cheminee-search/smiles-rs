@@ -32,6 +32,11 @@ assert_eq!(formula.to_string(), "C₂H₆O");
 
 ## Features
 
+`Smiles::atom_statistics()` borrows a concrete graph to count its atoms and recorded
+bracket, inferred, and graph hydrogens. Its checked integer counts and carbon
+total-connectivity fraction describe the supplied graph state; they do not
+sanitize molecules or implement a prepared native descriptor contract.
+
 | Feature | Effect |
 | ------- | ------ |
 | `datasets` | Streams PubChem, ZINC20, COCONUT, LOTUS and MassSpecGym from a local cache, requires `std`. See [`datasets`](https://docs.rs/smiles-rs/latest/smiles_rs/datasets/). |

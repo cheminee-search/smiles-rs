@@ -37,6 +37,7 @@ use crate::{
 
 mod aromaticity;
 mod atom_environment;
+mod atom_statistics;
 mod branches;
 mod canonicalization;
 mod connected_components;
@@ -69,6 +70,7 @@ pub use self::{
         WildcardAromaticityPerception,
     },
     atom_environment::AtomEnvironment,
+    atom_statistics::{AtomCountOverflow, AtomStatistics},
     canonicalization::SmilesCanonicalLabeling,
     connected_components::{SmilesComponents, WildcardSmilesComponents},
     double_bond_stereo::DoubleBondStereoConfig,
